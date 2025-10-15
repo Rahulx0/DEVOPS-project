@@ -289,21 +289,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support & Contact
 
-### 🆘 Getting Help
-- 📖 [Documentation](docs/)
-- 🐛 [Issue Tracker](https://github.com/yourusername/ecommerce-devops-project/issues)
-- 💬 [Discussions](https://github.com/yourusername/ecommerce-devops-project/discussions)
-
-### 👨‍💻 Maintainer
-**Your Name**
-- 📧 Email: your.email@example.com
-- 🐙 GitHub: [@yourusername](https://github.com/yourusername)
-- 💼 LinkedIn: [Your Profile](https://linkedin.com/in/yourprofile)
-
----
-
-<div align="center">
-
 ### 🌟 Star this project if it helped you!
 
 ![GitHub stars](https://img.shields.io/github/stars/yourusername/ecommerce-devops-project?style=social)
