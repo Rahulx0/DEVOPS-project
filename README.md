@@ -73,7 +73,8 @@ Build a production-ready platform that addresses these challenges through:
 
 ## 🔄 Complete DevOps Workflow
 
-![DevOps Workflow](https://ppl-ai-code-interpreter-files.s3.amazonaws.com/web/direct-files/df338851897fb819bb5ded5e6e34f800/34d76edd-bf08-44ec-aff8-bb44a2a01509/90778550.png)
+![DevOps Workflow](<img width="1024" height="1024" alt="Gemini_Generated_Image_nh336knh336knh33" src="https://github.com/user-attachments/assets/e8174548-45e0-4aed-b05f-d1e6acb586bb" />
+)
 
 
 ### Phase-by-Phase Breakdown
