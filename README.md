@@ -1,4 +1,4 @@
-# E-Commerce Platform with Modern DevOps
+<img width="1051" height="965" alt="image" src="https://github.com/user-attachments/assets/6fe1c56b-ddc2-4743-a963-10198f7808d0" /><img width="1051" height="965" alt="image" src="https://github.com/user-attachments/assets/4cdaebfe-a310-487c-8e3c-19fdede53a13" /># E-Commerce Platform with Modern DevOps
 
 <div align="center">
 
@@ -73,7 +73,8 @@ Build a production-ready platform that addresses these challenges through:
 
 ## 🔄 Complete DevOps Workflow
 
-![DevOps Workflow](https://ppl-ai-code-interpreter-files.s3.amazonaws.com/web/direct-files/df338851897fb819bb5ded5e6e34f800/34d76edd-bf08-44ec-aff8-bb44a2a01509/90778550.png)
+![DevOps Workflow](<img width="1051" height="965" alt="image" src="https://github.com/user-attachments/assets/3d5bdd18-f2c7-484c-83e1-7e159e9c3508" />
+)
 
 ### Phase-by-Phase Breakdown
 
