@@ -11,7 +11,7 @@
 
 ---
 
-## 🎯 Problem Statement
+## 🎯 Problem Statement.
 
 **Design and implement a scalable, cloud-native e-commerce platform that demonstrates enterprise-level DevOps practices for modern software delivery.**
 
