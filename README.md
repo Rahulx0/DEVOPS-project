@@ -1,4 +1,4 @@
-# 🚀 Production-Ready E-Commerce Platform with Modern DevOps
+# E-Commerce Platform with Modern DevOps
 
 <div align="center">
 
