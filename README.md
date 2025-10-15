@@ -140,7 +140,7 @@ cd ecommerce-devops-project
 
 # Deploy to AWS
 make deploy-all
-```
+````
 
 ### Local Development
 ```bash
