@@ -73,7 +73,7 @@ Build a production-ready platform that addresses these challenges through:
 
 ## 🔄 Complete DevOps Workflow
 
-![DevOps Workflow](<img width="1024" height="1024" alt="Gemini_Generated_Image_nh336knh336knh33" src="https://github.com/user-attachments/assets/9f0c77f0-f710-480e-8e5d-7a5151f281bc" />
+(<img width="1024" height="1024" alt="Gemini_Generated_Image_nh336knh336knh33" src="https://github.com/user-attachments/assets/9f0c77f0-f710-480e-8e5d-7a5151f281bc" />
 
 )
 
