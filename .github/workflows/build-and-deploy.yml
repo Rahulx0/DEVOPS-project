@@ -78,8 +78,8 @@ jobs:
       - name: Set image metadata outputs
         id: image
         run: |
-          echo "tag=${GITHUB_SHA}" >> $GITHUB_OUTPUT
-          echo "uri=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${GITHUB_SHA}" >> $GITHUB_OUTPUT
+          echo "tag=${{ env.TAG_SHA }}" >> $GITHUB_OUTPUT
+          echo "uri=${{ env.IMAGE }}:${{ env.TAG_SHA }}" >> $GITHUB_OUTPUT
 
       - name: Update deployment manifest
         run: |
