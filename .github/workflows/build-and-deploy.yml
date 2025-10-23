@@ -41,12 +41,11 @@ jobs:
 
       - name: Build, tag, and push image to Amazon ECR
         id: image
-        working-directory: ./app
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build --target production -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+          docker build --target production -f ${{ github.workspace }}/app/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest ${{ github.workspace }}/app
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
           echo "tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
@@ -123,9 +122,8 @@ jobs:
           cd app && npm run lint 2>/dev/null || true
 
       - name: Build Docker image for testing
-        working-directory: ./app
         run: |
-          docker build --target dev -t urbangear-frontend:test .
+          docker build --target dev -f ${{ github.workspace }}/app/Dockerfile -t urbangear-frontend:test ${{ github.workspace }}/app
 
   security-scan:
     name: Security Scan
