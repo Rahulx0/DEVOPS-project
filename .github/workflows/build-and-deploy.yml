@@ -69,7 +69,7 @@ jobs:
         with:
           context: ./app
           file: ./app/Dockerfile
-          target: production
+          target: prod
           push: true
           tags: |
             ${{ env.IMAGE }}:${{ env.TAG_SHA }}
