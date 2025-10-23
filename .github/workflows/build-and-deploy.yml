@@ -11,9 +11,9 @@ on:
       - rahul
 
 env:
-  AWS_REGION: ${{ secrets.AWS_REGION }}
-  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-  EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME }}
+  AWS_REGION: ${{ secrets.AWS_REGION || 'us-west-2' }}
+  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY || 'urbangear-dev-frontend' }}
+  EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME || 'urbangear-dev-cluster' }}
   KUBE_NAMESPACE: default
 
 jobs:
