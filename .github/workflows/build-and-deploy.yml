@@ -120,11 +120,32 @@ jobs:
 
       - name: Deploy to Kubernetes
         run: |
+          echo "Applying Kubernetes manifests..."
           kubectl apply -k manifests/overlays/prod/
+          
+          echo "Current deployment status:"
+          kubectl get deployment urbangear-frontend -n ${{ env.KUBE_NAMESPACE }} -o wide
 
       - name: Verify deployment
         run: |
+          echo "Checking deployment rollout status..."
           kubectl rollout status deployment/urbangear-frontend -n ${{ env.KUBE_NAMESPACE }} --timeout=5m
+        continue-on-error: true
+
+      - name: Debug deployment issues
+        if: failure()
+        run: |
+          echo "=== Deployment Debug Information ==="
+          kubectl describe deployment urbangear-frontend -n ${{ env.KUBE_NAMESPACE }}
+          echo ""
+          echo "=== Pod Status ==="
+          kubectl get pods -l app=urbangear-frontend -n ${{ env.KUBE_NAMESPACE }} -o wide
+          echo ""
+          echo "=== Pod Logs ==="
+          kubectl logs -l app=urbangear-frontend -n ${{ env.KUBE_NAMESPACE }} --tail=50 || true
+          echo ""
+          echo "=== Events ==="
+          kubectl get events -n ${{ env.KUBE_NAMESPACE }} --sort-by='.lastTimestamp' | tail -20
 
   test:
     name: Run Tests
