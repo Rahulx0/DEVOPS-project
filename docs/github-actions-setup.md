@@ -107,6 +107,8 @@ Add the following secrets one by one:
 | `ECR_REPOSITORY` | ECR repository name | `urbangear-dev-frontend` |
 | `EKS_CLUSTER_NAME` | EKS cluster name | `urbangear-dev-cluster` |
 
+**Note**: Secret names must use underscores, not hyphens (e.g., `ECR_REPOSITORY`, not `ECR-REPOSITORY`).
+
 ### 2.3 Verify Secrets
 After adding all secrets, you should see them listed (values will be hidden for security).
 
