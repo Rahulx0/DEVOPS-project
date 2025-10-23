@@ -1,0 +1,8 @@
+services:
+  frontend:
+    build:
+      context: ./app
+      target: prod
+    image: urbangear/frontend:local
+    ports:
+      - "8080:80"
