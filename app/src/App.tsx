@@ -17,46 +17,50 @@ import Wishlist from "./components/Wishlist";
 import { Toaster } from "react-hot-toast";
 
 // Re-triggering CI/CD workflow
-function App() {
+import { AuthProvider, useAuth } from './context/AuthContext';
+import Auth from './components/Auth';
+
+// ... existing code ...
+
+function AppContent() {
+  const { session, loading } = useAuth();
   const [view, setView] = useState<AppView>('home');
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
 
   const renderView = () => {
-    switch (view) {
-      case 'home':
-        return <Home setView={setView} />;
-      case 'products':
-        return <ProductsPage setView={setView} setSelectedProductId={setSelectedProductId} />;
-      case 'cart':
-        return <CartView setView={setView} />;
-      case 'checkout':
-        return <CheckoutView setView={setView} />;
-      case 'success':
-        return <SuccessView setView={setView} />;
-      case 'productDetail':
-        return <ProductDetail productId={selectedProductId} setView={setView} />;
-      case 'wishlist':
-        return <WishlistView setView={setView} />;
-      default:
-        return <Home setView={setView} />;
+    if (loading) {
+      return <div>Loading...</div>;
     }
+    if (!session) {
+      return <Auth setView={setView} />;
+    }
+    // ... existing code ...
   };
 
   return (
-    <CartProvider>
-      <WishlistProvider>
-        <ToastProvider>
-          <div className="bg-background text-text-dark font-sans min-h-screen flex flex-col">
-            <Header setView={setView} />
-            <main className="flex-grow pt-20">
-              {renderView()}
-            </main>
-            <Footer />
-            <Toaster />
-          </div>
-        </ToastProvider>
-      </WishlistProvider>
-    </CartProvider>
+    <div className="bg-background text-text-dark font-sans min-h-screen flex flex-col">
+      <Header setView={setView} />
+      <main className="flex-grow pt-20">
+        {renderView()}
+      </main>
+      <Footer />
+      <Toaster />
+    </div>
+  );
+}
+
+// ... existing code ...
+function App() {
+  return (
+    <AuthProvider>
+      <CartProvider>
+        <WishlistProvider>
+          <ToastProvider>
+            <AppContent />
+          </ToastProvider>
+        </WishlistProvider>
+      </CartProvider>
+    </AuthProvider>
   );
 }
 

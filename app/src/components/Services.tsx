@@ -1,43 +1,67 @@
-import React, { useState, useMemo } from 'react';
-import { products } from '../lib/data';
-import { AppView } from '../lib/types';
+import React, { useState, useEffect, useMemo } from 'react';
+import { supabase } from '../lib/supabaseClient';
+import { Product, AppView } from '../lib/types';
 import ProductCard from './ServiceCard';
 import { SearchIcon } from '../constants';
 import { Input } from './ui/Input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/Select';
 
-
 interface ProductsPageProps {
   setView: (view: AppView) => void;
-  category: 'Apparel' | 'Sneakers';
+  setSelectedProductId: (id: number) => void;
 }
 
-const ProductsPage: React.FC<ProductsPageProps> = ({ category, setView }) => {
+const ProductsPage: React.FC<ProductsPageProps> = ({ setView, setSelectedProductId }) => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState('default');
 
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const { data, error } = await supabase.from('products').select('*');
+      if (error) {
+        setError(error.message);
+      } else {
+        setProducts(data);
+      }
+      setLoading(false);
+    };
+
+    fetchProducts();
+  }, []);
+
   const filteredAndSortedProducts = useMemo(() => {
-    let categoryProducts = products.filter(p => p.category === category);
+    let filtered = [...products];
 
     if (searchTerm) {
-      categoryProducts = categoryProducts.filter(p =>
+      filtered = filtered.filter(p =>
         p.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
     if (sortOrder === 'price-asc') {
-      categoryProducts.sort((a, b) => a.price - b.price);
+      filtered.sort((a, b) => a.price - b.price);
     } else if (sortOrder === 'price-desc') {
-      categoryProducts.sort((a, b) => b.price - a.price);
+      filtered.sort((a, b) => b.price - a.price);
     }
 
-    return categoryProducts;
-  }, [category, searchTerm, sortOrder]);
+    return filtered;
+  }, [products, searchTerm, sortOrder]);
+
+  if (loading) {
+    return <div className="text-center py-10">Loading products...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center py-10 text-red-500">Error: {error}</div>;
+  }
 
   return (
     <section className="py-16 bg-white">
       <div className="container mx-auto px-6">
-        <h2 className="text-4xl md:text-5xl font-heading font-bold mb-8 text-center text-primary">{category}</h2>
+        <h2 className="text-4xl md:text-5xl font-heading font-bold mb-8 text-center text-primary">Our Products</h2>
         
         <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-4">
           <div className="relative w-full md:w-1/3">
@@ -67,7 +91,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ category, setView }) => {
         {filteredAndSortedProducts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {filteredAndSortedProducts.map(product => (
-              <ProductCard key={product.id} product={product} setView={setView} />
+              <ProductCard key={product.id} product={product} setView={setView} setSelectedProductId={setSelectedProductId} />
             ))}
           </div>
         ) : (
