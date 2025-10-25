@@ -74,6 +74,9 @@ jobs:
           tags: |
             ${{ env.IMAGE }}:${{ env.TAG_SHA }}
             ${{ env.IMAGE }}:latest
+          build-args: |
+            VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}
+            VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
       - name: Set image metadata outputs
         id: image
