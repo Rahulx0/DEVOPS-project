@@ -23,15 +23,13 @@ const App: React.FC = () => {
   const renderView = () => {
     switch (view.name) {
       case 'apparel':
-        return <ProductsPage setView={setView} />;
+        return <ProductsPage setView={setView} category="Apparel" />;
       case 'sneakers':
-        return <ProductsPage setView={setView} />;
+        return <ProductsPage setView={setView} category="Sneakers" />;
       case 'productDetail':
         return <ProductDetail setView={setView} product={view.data} />;
       case 'cart':
         return <CartView setView={setView} />;
-      case 'wishlist':
-        return <WishlistView setView={setView} />;
       case 'checkout':
         return <CheckoutView setView={setView} />;
       case 'success':
@@ -40,6 +38,8 @@ const App: React.FC = () => {
         return <Login setView={setView} />;
       case 'signup':
         return <SignUp setView={setView} />;
+      case 'wishlist':
+        return <WishlistView setView={setView} />;
       case 'home':
       default:
         return <Home setView={setView} />;

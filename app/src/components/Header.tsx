@@ -45,11 +45,11 @@ const Header: React.FC<HeaderProps> = ({ setView }) => {
             </button>
         </div>
         
-        {/* Desktop Nav */}
-        <ul className="hidden md:flex flex-1 justify-center items-center space-x-8 font-semibold">
-          <li><Button variant="ghost" onClick={() => handleNavClick({ name: 'sneakers' })}>Sneakers</Button></li>
-          <li><Button variant="ghost" onClick={() => handleNavClick({ name: 'apparel' })}>Apparel</Button></li>
-        </ul>
+  {/* Desktop Nav */}
+  <ul className="hidden md:flex flex-1 justify-center items-center space-x-8 font-semibold">
+    <li><Button variant="ghost" onClick={() => handleNavClick({ name: 'sneakers' })}>Sneakers</Button></li>
+    <li><Button variant="ghost" onClick={() => handleNavClick({ name: 'apparel' })}>Apparel</Button></li>
+  </ul>
 
         {/* Icons */}
         <div className="hidden md:flex flex-1 justify-end items-center gap-2">

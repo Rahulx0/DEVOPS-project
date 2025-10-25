@@ -63,15 +63,16 @@ jobs:
           echo "IMAGE: '${{ env.IMAGE }}'"
           echo "TAG_SHA: '${{ env.TAG_SHA }}'"
 
-            - name: Build and push Docker image
+      - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
           context: ./app
           push: true
-          tags: ${{ env.IMAGE }}:${{ env.TAG_SHA }}
+          tags: |
+            ${{ env.IMAGE }}:${{ env.TAG_SHA }}
+            ${{ env.IMAGE }}:latest
           target: prod
           build-args: |
-            NODE_ENV=production
             VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}
             VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}
 

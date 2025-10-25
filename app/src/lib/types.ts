@@ -14,7 +14,6 @@ export interface CartItem extends Product {
 }
 
 export type ViewType = 'home' | 'apparel' | 'sneakers' | 'cart' | 'checkout' | 'success' | 'wishlist' | 'product';
-
 export type AppView =
   | { name: 'home' }
   | { name: 'apparel' }
