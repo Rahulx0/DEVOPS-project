@@ -36,8 +36,8 @@ const Header: React.FC<HeaderProps> = ({ setView }) => {
         
         {/* Desktop Nav */}
         <ul className="hidden md:flex flex-1 justify-center items-center space-x-8 font-semibold">
-          <li><Button variant="ghost" onClick={() => handleNavClick({ type: 'sneakers' })}>Sneakers</Button></li>
-          <li><Button variant="ghost" onClick={() => handleNavClick({ type: 'apparel' })}>Apparel</Button></li>
+          <li><Button variant="ghost" onClick={() => handleNavClick({ type: 'products', category: 'Sneakers' })}>Sneakers</Button></li>
+          <li><Button variant="ghost" onClick={() => handleNavClick({ type: 'products', category: 'Apparel' })}>Apparel</Button></li>
         </ul>
 
         {/* Icons */}
@@ -86,8 +86,8 @@ const Header: React.FC<HeaderProps> = ({ setView }) => {
                     </button>
                 </SheetHeader>
                 <ul className="flex flex-col items-start space-y-4 mt-8">
-                  <li><Button variant="link" className="text-2xl" onClick={() => handleNavClick({ type: 'sneakers' })}>Sneakers</Button></li>
-                  <li><Button variant="link" className="text-2xl" onClick={() => handleNavClick({ type: 'apparel' })}>Apparel</Button></li>
+                  <li><Button variant="link" className="text-2xl" onClick={() => handleNavClick({ type: 'products', category: 'Sneakers' })}>Sneakers</Button></li>
+                  <li><Button variant="link" className="text-2xl" onClick={() => handleNavClick({ type: 'products', category: 'Apparel' })}>Apparel</Button></li>
                   <li className="border-t border-gray-200 w-full pt-4 mt-4">
                     <Button variant="link" className="text-2xl" onClick={() => handleNavClick({ type: 'wishlist' })}>
                       Wishlist ({wishlistCount})

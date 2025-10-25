@@ -9,9 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 interface ProductsPageProps {
   setView: (view: AppView) => void;
   setSelectedProductId: (id: number) => void;
+  category: 'Apparel' | 'Sneakers';
 }
 
-const ProductsPage: React.FC<ProductsPageProps> = ({ setView, setSelectedProductId }) => {
+const ProductsPage: React.FC<ProductsPageProps> = ({ category, setView, setSelectedProductId }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,17 +21,38 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ setView, setSelectedProduct
 
   useEffect(() => {
     const fetchProducts = async () => {
-      const { data, error } = await supabase.from('products').select('*');
-      if (error) {
-        setError(error.message);
+      setLoading(true);
+      
+      // Query the categories table to get the ID for the given category name
+      const { data: categoryData, error: categoryError } = await supabase
+        .from('categories')
+        .select('id')
+        .eq('name', category)
+        .single();
+
+      if (categoryError || !categoryData) {
+        setError(categoryError?.message || 'Category not found.');
+        console.error("Error fetching category:", categoryError);
+        setLoading(false);
+        return;
+      }
+
+      const { data, error: productsError } = await supabase
+        .from('products')
+        .select('*')
+        .eq('category_id', categoryData.id);
+
+      if (productsError) {
+        setError(productsError.message);
+        console.error("Error fetching products:", productsError);
       } else {
-        setProducts(data);
+        setProducts(data || []);
       }
       setLoading(false);
     };
 
     fetchProducts();
-  }, []);
+  }, [category]);
 
   const filteredAndSortedProducts = useMemo(() => {
     let filtered = [...products];
@@ -55,13 +77,13 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ setView, setSelectedProduct
   }
 
   if (error) {
-    return <div className="text-center py-10 text-red-500">Error: {error}</div>;
+    return <div className="text-center py-10 text-red-500">Error fetching products. Please check the console for details.</div>;
   }
 
   return (
     <section className="py-16 bg-white">
       <div className="container mx-auto px-6">
-        <h2 className="text-4xl md:text-5xl font-heading font-bold mb-8 text-center text-primary">Our Products</h2>
+        <h2 className="text-4xl md:text-5xl font-heading font-bold mb-8 text-center text-primary">{category}</h2>
         
         <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-4">
           <div className="relative w-full md:w-1/3">
@@ -95,7 +117,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ setView, setSelectedProduct
             ))}
           </div>
         ) : (
-            <p className="text-center text-text-light text-xl">No products found.</p>
+            <p className="text-center text-text-light text-xl">No products found for this category.</p>
         )}
       </div>
     </section>

@@ -24,7 +24,7 @@ import Auth from './components/Auth';
 
 function AppContent() {
   const { session, loading } = useAuth();
-  const [view, setView] = useState<AppView>('home');
+  const [view, setView] = useState<AppView>({ type: 'home' });
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
 
   const renderView = () => {
@@ -34,7 +34,24 @@ function AppContent() {
     if (!session) {
       return <Auth setView={setView} />;
     }
-    // ... existing code ...
+    switch (view.type) {
+      case 'home':
+        return <Home setView={setView} />;
+      case 'products':
+        return <ProductsPage setView={setView} setSelectedProductId={setSelectedProductId} category={view.category} />;
+      case 'cart':
+        return <CartView setView={setView} />;
+      case 'checkout':
+        return <CheckoutView setView={setView} />;
+      case 'success':
+        return <SuccessView setView={setView} />;
+      case 'product':
+        return <ProductDetail productId={view.id} setView={setView} />;
+      case 'wishlist':
+        return <WishlistView setView={setView} />;
+      default:
+        return <Home setView={setView} />;
+    }
   };
 
   return (

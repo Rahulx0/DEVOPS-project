@@ -15,8 +15,7 @@ export type ViewType = 'home' | 'apparel' | 'sneakers' | 'cart' | 'checkout' | '
 
 export type AppView = 
   | { type: 'home' }
-  | { type: 'apparel' }
-  | { type: 'sneakers' }
+  | { type: 'products', category?: 'Apparel' | 'Sneakers' }
   | { type: 'cart' }
   | { type: 'checkout' }
   | { type: 'success' }
