@@ -1,43 +1,81 @@
-import React, { useState, useMemo } from 'react';
-import { products } from '../lib/data';
-import { AppView } from '../lib/types';
-import ProductCard from './ServiceCard';
-import { SearchIcon } from '../constants';
+import React, { useState, useMemo, useEffect } from 'react';
+import { supabase } from '@/lib/supabaseClient';
+import { AppView, Product } from '@/lib/types';
+import ProductCard from './ProductCard';
+import { SearchIcon } from '@/constants';
 import { Input } from './ui/Input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/Select';
-
+import { useToast } from '@/hooks/useToast';
 
 interface ProductsPageProps {
   setView: (view: AppView) => void;
-  category: 'Apparel' | 'Sneakers';
+  category?: 'Apparel' | 'Sneakers';
 }
 
 const ProductsPage: React.FC<ProductsPageProps> = ({ category, setView }) => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState('default');
+  const { showToast } = useToast();
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      let query = supabase.from('products').select(`
+        *,
+        category:categories ( name )
+      `);
+
+      if (category) {
+        query = query.eq('categories.name', category);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        setError(error.message);
+        showToast(`Error fetching products: ${error.message}`, { type: 'error' });
+      } else {
+        setProducts(data as any[]); // Using any[] temporarily
+      }
+      setLoading(false);
+    };
+
+    fetchProducts();
+  }, [category]);
 
   const filteredAndSortedProducts = useMemo(() => {
-    let categoryProducts = products.filter(p => p.category === category);
+    let filteredProducts = [...products];
 
     if (searchTerm) {
-      categoryProducts = categoryProducts.filter(p =>
+      filteredProducts = filteredProducts.filter(p =>
         p.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
     if (sortOrder === 'price-asc') {
-      categoryProducts.sort((a, b) => a.price - b.price);
+      filteredProducts.sort((a, b) => a.price - b.price);
     } else if (sortOrder === 'price-desc') {
-      categoryProducts.sort((a, b) => b.price - a.price);
+      filteredProducts.sort((a, b) => b.price - a.price);
     }
 
-    return categoryProducts;
-  }, [category, searchTerm, sortOrder]);
+    return filteredProducts;
+  }, [products, searchTerm, sortOrder]);
+
+  if (loading) {
+    return <p className="text-center py-16">Loading products...</p>;
+  }
+
+  if (error) {
+    return <p className="text-center py-16 text-red-500">Error: {error}</p>;
+  }
 
   return (
     <section className="py-16 bg-white">
       <div className="container mx-auto px-6">
-        <h2 className="text-4xl md:text-5xl font-heading font-bold mb-8 text-center text-primary">{category}</h2>
+        <h2 className="text-4xl md:text-5xl font-heading font-bold mb-8 text-center text-primary">{category || 'All Products'}</h2>
         
         <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-4">
           <div className="relative w-full md:w-1/3">

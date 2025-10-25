@@ -1,10 +1,10 @@
 import React from 'react';
-import { products } from '../lib/data';
-import { AppView } from '../lib/types';
-import { useCart } from '../hooks/useCart';
-import { useWishlist } from '../hooks/useWishlist';
-import { useToast } from '../hooks/useToast';
-import { HeartIcon, ShoppingCartIcon } from '../constants';
+import { products } from '@/lib/data';
+import { AppView } from '@/lib/types';
+import { useCart } from '@/hooks/useCart';
+import { useWishlist } from '@/hooks/useWishlist';
+import { useToast } from '@/hooks/useToast';
+import { HeartIcon, ShoppingCartIcon } from '@/constants';
 import { Button } from './ui/Button';
 
 interface ProductDetailProps {

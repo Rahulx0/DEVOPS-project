@@ -1,7 +1,8 @@
 import React from 'react';
 import { useCart } from '../hooks/useCart';
 import { AppView } from '../lib/types';
-import CartItemRow from './PortfolioCard'; // Repurposed as CartItemRow
+import { products } from '@/lib/data';
+import PortfolioCard from './PortfolioCard'; // Repurposed as CartItemRow
 import { Button } from './ui/Button';
 
 interface CartViewProps {
@@ -26,7 +27,7 @@ const CartView: React.FC<CartViewProps> = ({ setView }) => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 bg-white p-4 sm:p-6 rounded-lg border border-gray-200 space-y-4">
               {cartItems.map(item => (
-                <CartItemRow key={item.id} item={item} />
+                <PortfolioCard key={item.id} item={item} />
               ))}
             </div>
             <div className="bg-white p-6 rounded-lg border border-gray-200 self-start">

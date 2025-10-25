@@ -13,21 +13,21 @@ import ProductDetail from './components/ProductDetail';
 import WishlistView from './components/Wishlist';
 import ToastContainer from './components/Toast';
 import { AppView } from './lib/types';
-import Wishlist from "./components/Wishlist";
-import { Toaster } from "react-hot-toast";
+import Login from './components/Login';
+import SignUp from './components/SignUp';
+import { AuthProvider } from './context/AuthContext';
 
-// CI/CD Test Trigger
 const App: React.FC = () => {
-  const [view, setView] = useState<AppView>({ type: 'home' });
+  const [view, setView] = useState<AppView>({ name: 'home' });
 
   const renderView = () => {
-    switch (view.type) {
+    switch (view.name) {
       case 'apparel':
-        return <ProductsPage setView={setView} category="Apparel" />;
+        return <ProductsPage setView={setView} />;
       case 'sneakers':
-        return <ProductsPage setView={setView} category="Sneakers" />;
-      case 'product':
-        return <ProductDetail setView={setView} productId={view.id} />;
+        return <ProductsPage setView={setView} />;
+      case 'productDetail':
+        return <ProductDetail setView={setView} product={view.data} />;
       case 'cart':
         return <CartView setView={setView} />;
       case 'wishlist':
@@ -36,6 +36,10 @@ const App: React.FC = () => {
         return <CheckoutView setView={setView} />;
       case 'success':
         return <SuccessView setView={setView} />;
+      case 'login':
+        return <Login setView={setView} />;
+      case 'signup':
+        return <SignUp setView={setView} />;
       case 'home':
       default:
         return <Home setView={setView} />;
@@ -44,18 +48,20 @@ const App: React.FC = () => {
 
   return (
     <ToastProvider>
-      <CartProvider>
-        <WishlistProvider>
-          <div className="bg-background text-text-dark font-sans min-h-screen flex flex-col">
-            <Header setView={setView} />
-            <main className="flex-grow pt-20">
-              {renderView()}
-            </main>
-            <Footer />
-            <ToastContainer />
-          </div>
-        </WishlistProvider>
-      </CartProvider>
+      <AuthProvider>
+        <CartProvider>
+          <WishlistProvider>
+            <div className="bg-background text-text-dark font-sans min-h-screen flex flex-col">
+              <Header setView={setView} />
+              <main className="flex-grow pt-20">
+                {renderView()}
+              </main>
+              <Footer />
+              <ToastContainer />
+            </div>
+          </WishlistProvider>
+        </CartProvider>
+      </AuthProvider>
     </ToastProvider>
   );
 };

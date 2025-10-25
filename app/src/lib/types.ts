@@ -2,8 +2,10 @@ export interface Product {
   id: number;
   name: string;
   price: number;
-  image: string;
-  category: 'Apparel' | 'Sneakers';
+  image_url: string;
+  category: {
+    name: 'Apparel' | 'Sneakers';
+  };
   description: string;
 }
 
@@ -13,12 +15,14 @@ export interface CartItem extends Product {
 
 export type ViewType = 'home' | 'apparel' | 'sneakers' | 'cart' | 'checkout' | 'success' | 'wishlist' | 'product';
 
-export type AppView = 
-  | { type: 'home' }
-  | { type: 'apparel' }
-  | { type: 'sneakers' }
-  | { type: 'cart' }
-  | { type: 'checkout' }
-  | { type: 'success' }
-  | { type: 'wishlist' }
-  | { type: 'product', id: number };
+export type AppView =
+  | { name: 'home' }
+  | { name: 'apparel' }
+  | { name: 'sneakers' }
+  | { name: 'productDetail'; data: any }
+  | { name: 'cart' }
+  | { name: 'wishlist' }
+  | { name: 'checkout' }
+  | { name: 'success' }
+  | { name: 'login' }
+  | { name: 'signup' };
