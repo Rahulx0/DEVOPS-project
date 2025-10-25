@@ -10,7 +10,7 @@ import { Button } from './ui/Button';
 interface ProductCardProps {
   product: Product;
   setView: (view: AppView) => void;
-  setSelectedProductId: (id: number) => void;
+  setSelectedProductId?: (id: number) => void;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, setView, setSelectedProductId }) => {
@@ -37,8 +37,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, setView, setSelected
   };
 
   const handleProductClick = () => {
-    setSelectedProductId(product.id);
-    setView('productDetail');
+    if (setSelectedProductId) {
+      setSelectedProductId(product.id);
+    }
+    setView({ type: 'product', id: product.id });
   };
 
   return (
@@ -48,7 +50,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, setView, setSelected
     >
       <CardHeader className="p-0">
         <div className="relative h-64 sm:h-80 overflow-hidden">
-          <img src={product.image_url || 'https://via.placeholder.com/300'} alt={product.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+          <img src={product.image || product.image_url || 'https://via.placeholder.com/300'} alt={product.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
           <Button 
             variant="secondary"
             size="icon"

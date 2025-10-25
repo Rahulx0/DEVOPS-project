@@ -1,6 +1,6 @@
-import React from 'react';
-import { products } from '../lib/data';
-import { AppView } from '../lib/types';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabaseClient';
+import { Product, AppView } from '../lib/types';
 import { useCart } from '../hooks/useCart';
 import { useWishlist } from '../hooks/useWishlist';
 import { useToast } from '../hooks/useToast';
@@ -13,11 +13,40 @@ interface ProductDetailProps {
 }
 
 const ProductDetail: React.FC<ProductDetailProps> = ({ productId, setView }) => {
-  const product = products.find(p => p.id === productId);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isWishlisted } = useWishlist();
   const showToast = useToast();
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('id', productId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching product:', error);
+      } else {
+        setProduct(data);
+      }
+      setLoading(false);
+    };
+
+    fetchProduct();
+  }, [productId]);
   
+  if (loading) {
+    return (
+      <div className="container mx-auto px-6 py-16 text-center">
+        <div className="text-xl">Loading product...</div>
+      </div>
+    );
+  }
+
   if (!product) {
     return (
       <div className="container mx-auto px-6 py-16 text-center">
@@ -51,11 +80,11 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, setView }) => 
       <div className="container mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           <div>
-            <img src={product.image} alt={product.name} className="w-full h-auto object-cover rounded-lg shadow-lg" />
+            <img src={product.image || product.image_url || 'https://via.placeholder.com/400'} alt={product.name} className="w-full h-auto object-cover rounded-lg shadow-lg" />
           </div>
           <div>
-            <Button variant="link" onClick={() => setView({ type: product.category === 'Apparel' ? 'apparel' : 'sneakers' })} className="text-sm p-0 h-auto mb-2">
-              &larr; Back to {product.category}
+            <Button variant="link" onClick={() => setView({ type: 'products', category: product.category || 'Apparel' })} className="text-sm p-0 h-auto mb-2">
+              &larr; Back to {product.category || 'Products'}
             </Button>
             <h1 className="text-4xl md:text-5xl font-heading font-bold text-primary mb-4">{product.name}</h1>
             <p className="text-3xl font-semibold text-text-light mb-6">₹{product.price.toLocaleString()}</p>

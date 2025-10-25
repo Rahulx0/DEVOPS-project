@@ -2,8 +2,10 @@ export interface Product {
   id: number;
   name: string;
   price: number;
-  image: string;
-  category: 'Apparel' | 'Sneakers';
+  image?: string;
+  image_url?: string;
+  category?: 'Apparel' | 'Sneakers';
+  category_id?: number;
   description: string;
 }
 
