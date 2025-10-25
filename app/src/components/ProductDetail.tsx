@@ -15,6 +15,7 @@ interface ProductDetailProps {
 const ProductDetail: React.FC<ProductDetailProps> = ({ productId, setView }) => {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isWishlisted } = useWishlist();
   const showToast = useToast();
@@ -22,14 +23,16 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, setView }) => 
   useEffect(() => {
     const fetchProduct = async () => {
       setLoading(true);
-      const { data, error } = await supabase
+      setError(null);
+      const { data, error: fetchError } = await supabase
         .from('products')
         .select('*')
         .eq('id', productId)
         .single();
 
-      if (error) {
-        console.error('Error fetching product:', error);
+      if (fetchError) {
+        console.error('Error fetching product:', fetchError);
+        setError('Failed to load product details. Please try again later.');
       } else {
         setProduct(data);
       }
@@ -43,6 +46,18 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, setView }) => 
     return (
       <div className="container mx-auto px-6 py-16 text-center">
         <div className="text-xl">Loading product...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto px-6 py-16 text-center">
+        <h2 className="text-3xl font-heading font-bold text-red-500 mb-4">Error</h2>
+        <p className="text-xl mb-4">{error}</p>
+        <Button onClick={() => setView({type: 'home'})} className="mt-4">
+          Back to Home
+        </Button>
       </div>
     );
   }

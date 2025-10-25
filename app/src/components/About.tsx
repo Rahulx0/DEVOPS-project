@@ -11,17 +11,20 @@ interface HomeProps {
 const Home: React.FC<HomeProps> = ({ setView }) => {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
       setLoading(true);
-      const { data, error } = await supabase
+      setError(null);
+      const { data, error: fetchError } = await supabase
         .from('products')
         .select('*')
         .limit(4);
 
-      if (error) {
-        console.error('Error fetching featured products:', error);
+      if (fetchError) {
+        console.error('Error fetching featured products:', fetchError);
+        setError('Failed to load featured products. Please try again later.');
       } else {
         setFeaturedProducts(data || []);
       }
@@ -40,6 +43,8 @@ const Home: React.FC<HomeProps> = ({ setView }) => {
           <h2 className="text-4xl md:text-5xl font-heading font-bold text-primary mb-12">Featured Products</h2>
           {loading ? (
             <div className="text-center py-10">Loading featured products...</div>
+          ) : error ? (
+            <div className="text-center py-10 text-red-500">{error}</div>
           ) : featuredProducts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {featuredProducts.map((product, index) => (
