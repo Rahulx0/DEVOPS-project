@@ -13,7 +13,10 @@ import ProductDetail from './components/ProductDetail';
 import WishlistView from './components/Wishlist';
 import ToastContainer from './components/Toast';
 import { AppView } from './lib/types';
+import Wishlist from "./components/Wishlist";
+import { Toaster } from "react-hot-toast";
 
+// CI/CD Test Trigger
 const App: React.FC = () => {
   const [view, setView] = useState<AppView>({ type: 'home' });
 
