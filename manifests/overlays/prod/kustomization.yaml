@@ -4,15 +4,18 @@ kind: Kustomization
 resources:
 - ../../base
 
-patchesStrategicMerge:
-- deployment-patch.yaml
+patches:
+- path: deployment-patch.yaml
 
 replicas:
 - name: urbangear-frontend
   count: 3
 
-commonLabels:
-  environment: prod
+labels:
+- pairs:
+    environment: prod
+  includeSelectors: true
+  includeTemplates: true
 
 images:
 - name: PLACEHOLDER_ECR_URI

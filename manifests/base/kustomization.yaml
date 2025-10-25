@@ -4,9 +4,12 @@ kind: Kustomization
 resources:
 - deployment.yaml
 
-commonLabels:
-  project: urbangear
-  environment: dev
+labels:
+- pairs:
+    project: urbangear
+    environment: dev
+  includeSelectors: true
+  includeTemplates: true
 
 images:
 - name: PLACEHOLDER_ECR_URI
