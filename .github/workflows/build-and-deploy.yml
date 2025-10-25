@@ -121,6 +121,7 @@ jobs:
       - name: Deploy to Kubernetes
         run: |
           echo "Applying Kubernetes manifests..."
+          kubectl delete deployment urbangear-frontend --ignore-not-found=true
           kubectl apply -k manifests/overlays/prod/
           
           echo "Current deployment status:"
