@@ -16,48 +16,48 @@ import { AppView } from './lib/types';
 import Wishlist from "./components/Wishlist";
 import { Toaster } from "react-hot-toast";
 
-// CI/CD Test Trigger
-const App: React.FC = () => {
-  const [view, setView] = useState<AppView>({ type: 'home' });
+// Re-triggering CI/CD workflow
+function App() {
+  const [view, setView] = useState<AppView>('home');
+  const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
 
   const renderView = () => {
-    switch (view.type) {
-      case 'apparel':
-        return <ProductsPage setView={setView} category="Apparel" />;
-      case 'sneakers':
-        return <ProductsPage setView={setView} category="Sneakers" />;
-      case 'product':
-        return <ProductDetail setView={setView} productId={view.id} />;
+    switch (view) {
+      case 'home':
+        return <Home setView={setView} />;
+      case 'products':
+        return <ProductsPage setView={setView} setSelectedProductId={setSelectedProductId} />;
       case 'cart':
         return <CartView setView={setView} />;
-      case 'wishlist':
-        return <WishlistView setView={setView} />;
       case 'checkout':
         return <CheckoutView setView={setView} />;
       case 'success':
         return <SuccessView setView={setView} />;
-      case 'home':
+      case 'productDetail':
+        return <ProductDetail productId={selectedProductId} setView={setView} />;
+      case 'wishlist':
+        return <WishlistView setView={setView} />;
       default:
         return <Home setView={setView} />;
     }
   };
 
   return (
-    <ToastProvider>
-      <CartProvider>
-        <WishlistProvider>
+    <CartProvider>
+      <WishlistProvider>
+        <ToastProvider>
           <div className="bg-background text-text-dark font-sans min-h-screen flex flex-col">
             <Header setView={setView} />
             <main className="flex-grow pt-20">
               {renderView()}
             </main>
             <Footer />
-            <ToastContainer />
+            <Toaster />
           </div>
-        </WishlistProvider>
-      </CartProvider>
-    </ToastProvider>
+        </ToastProvider>
+      </WishlistProvider>
+    </CartProvider>
   );
-};
+}
 
 export default App;
