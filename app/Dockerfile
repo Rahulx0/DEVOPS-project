@@ -2,7 +2,7 @@
 
 FROM node:20-alpine AS deps
 WORKDIR /usr/src/app
-COPY package*.json ./
+COPY package.json package-lock.json ./
 RUN npm ci
 
 FROM deps AS dev

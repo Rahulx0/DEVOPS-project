@@ -1,6 +1,6 @@
-import React from 'react';
-import { products } from '@/lib/data';
-import { AppView } from '@/lib/types';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabaseClient';
+import { AppView, Product } from '@/lib/types';
 import { useCart } from '@/hooks/useCart';
 import { useWishlist } from '@/hooks/useWishlist';
 import { useToast } from '@/hooks/useToast';
@@ -9,20 +9,19 @@ import { Button } from './ui/Button';
 
 interface ProductDetailProps {
   setView: (view: AppView) => void;
-  productId: number;
+  product: Product;
 }
 
-const ProductDetail: React.FC<ProductDetailProps> = ({ productId, setView }) => {
-  const product = products.find(p => p.id === productId);
+const ProductDetail: React.FC<ProductDetailProps> = ({ product, setView }) => {
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isWishlisted } = useWishlist();
-  const showToast = useToast();
+  const { showToast } = useToast();
   
   if (!product) {
     return (
       <div className="container mx-auto px-6 py-16 text-center">
         <h2 className="text-3xl font-heading font-bold">Product not found</h2>
-        <Button onClick={() => setView({type: 'home'})} className="mt-4">
+        <Button onClick={() => setView({ name: 'home' })} className="mt-4">
           Back to Home
         </Button>
       </div>
@@ -51,11 +50,11 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, setView }) => 
       <div className="container mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           <div>
-            <img src={product.image} alt={product.name} className="w-full h-auto object-cover rounded-lg shadow-lg" />
+            <img src={product.image_url} alt={product.name} className="w-full h-auto object-cover rounded-lg shadow-lg" />
           </div>
           <div>
-            <Button variant="link" onClick={() => setView({ type: product.category === 'Apparel' ? 'apparel' : 'sneakers' })} className="text-sm p-0 h-auto mb-2">
-              &larr; Back to {product.category}
+            <Button variant="link" onClick={() => setView({ name: product.category.name === 'Apparel' ? 'apparel' : 'sneakers' })} className="text-sm p-0 h-auto mb-2">
+              &larr; Back to {product.category.name}
             </Button>
             <h1 className="text-4xl md:text-5xl font-heading font-bold text-primary mb-4">{product.name}</h1>
             <p className="text-3xl font-semibold text-text-light mb-6">₹{product.price.toLocaleString()}</p>

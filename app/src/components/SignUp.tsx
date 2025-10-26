@@ -13,13 +13,25 @@ const SignUp = ({ setView }: { setView: (view: any) => void }) => {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) {
       showToast(error.message, { type: 'error' });
-    } else {
-      showToast('Check your email for the confirmation link!', { type: 'success' });
-      setView({ name: 'login' });
+      setLoading(false);
+      return;
     }
+
+    // Optionally store a profile row for the user if a 'profiles' table exists (id UUID primary key)
+    try {
+      if (data.user) {
+        await supabase.from('profiles').insert({ id: data.user.id, email });
+      }
+    } catch (e) {
+      // Ignore if table or RLS policy isn't set up; auth still succeeded
+      console.warn('Skipping profile insert:', e);
+    }
+
+    showToast('Check your email for the confirmation link!', { type: 'success' });
+    setView({ name: 'login' });
     setLoading(false);
   };
 
