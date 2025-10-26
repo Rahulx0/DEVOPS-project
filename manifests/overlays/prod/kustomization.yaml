@@ -4,6 +4,9 @@ kind: Kustomization
 resources:
 - ../../base
 
+# Include autoscaling for production
+- hpa.yaml
+
 patches:
 - path: deployment-patch.yaml
 

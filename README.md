@@ -1,5 +1,7 @@
 # E-Commerce Platform with Modern DevOps
 
+[![Build and Deploy](https://github.com/Rahulx0/DEVOPS-project/actions/workflows/build-and-deploy.yml/badge.svg?branch=rahul)](https://github.com/Rahulx0/DEVOPS-project/actions/workflows/build-and-deploy.yml)
+
 <div align="center">
 
 ![Project Banner](https://img.shields.io/badge/DevOps-Production%20Ready-blue?style=for-the-badge&logo=kubernetes)
