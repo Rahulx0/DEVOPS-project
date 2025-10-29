@@ -8,8 +8,8 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const createSupabaseClient = () => {
   if (!supabaseUrl || !supabaseAnonKey) {
     console.warn('Supabase URL and/or anon key are missing. Auth features will be disabled.');
-    // Return a mock client with minimal functionality
-    return createClient('https://placeholder.supabase.co', 'placeholder-key', {
+    // Return a mock client with minimal functionality using localhost to prevent external requests
+    return createClient('http://localhost:54321', 'mock-anon-key-placeholder', {
       auth: {
         persistSession: false,
         autoRefreshToken: false,

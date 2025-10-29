@@ -3,7 +3,7 @@
 FROM node:20-alpine AS deps
 WORKDIR /usr/src/app
 COPY package.json package-lock.json ./
-RUN npm install
+RUN npm ci || npm install
 
 FROM deps AS dev
 ENV NODE_ENV=development
@@ -14,7 +14,7 @@ CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]
 FROM node:20-alpine AS build
 WORKDIR /usr/src/app
 COPY package.json package-lock.json ./
-RUN npm install
+RUN npm ci || npm install
 ARG VITE_SUPABASE_URL=""
 ARG VITE_SUPABASE_ANON_KEY=""
 ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
