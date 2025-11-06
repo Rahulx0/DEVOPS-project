@@ -3,7 +3,6 @@ import { ShoppingCartIcon, HeartIcon, MenuIcon } from '../constants';
 import { useCart } from '../hooks/useCart';
 import { useWishlist } from '../hooks/useWishlist';
 import { AppView } from '../lib/types';
-import { Logo } from '../lib/Logo';
 import { Sheet, SheetContent, SheetHeader, SheetTrigger } from './ui/Sheet';
 import { Button } from './ui/Button';
 
@@ -25,12 +24,9 @@ const Header: React.FC<HeaderProps> = ({ setView }) => {
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md shadow-sm">
       <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
         {/* Logo */}
-        <div className="flex-1 flex justify-start items-center gap-2">
-            <button onClick={() => handleNavClick({ type: 'home' })} className="flex items-center gap-2">
-                <Logo className="w-8 h-8 text-primary" />
-                <span className="text-2xl font-heading font-bold tracking-tight text-primary">
-                    UrbanGear
-                </span>
+        <div className="flex-1 flex justify-start">
+            <button onClick={() => handleNavClick({ type: 'home' })} className="text-2xl font-heading font-bold tracking-tight text-primary">
+            UrbanGear
             </button>
         </div>
         
@@ -78,11 +74,8 @@ const Header: React.FC<HeaderProps> = ({ setView }) => {
               </SheetTrigger>
               <SheetContent>
                 <SheetHeader>
-                   <button onClick={() => handleNavClick({ type: 'home' })} className="flex items-center gap-2">
-                      <Logo className="w-8 h-8 text-primary" />
-                      <span className="text-2xl font-heading font-bold tracking-tight text-primary text-left">
-                        UrbanGear
-                      </span>
+                   <button onClick={() => handleNavClick({ type: 'home' })} className="text-2xl font-heading font-bold tracking-tight text-primary text-left">
+                      UrbanGear
                     </button>
                 </SheetHeader>
                 <ul className="flex flex-col items-start space-y-4 mt-8">

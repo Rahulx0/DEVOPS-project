@@ -1,25 +1,20 @@
-# UrbanGear Storefront
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+</div>
 
-Vite + React single-page application that powers the UrbanGear e-commerce experience. This project is the application layer within the larger training pipeline.
+# Run and deploy your AI Studio app
 
-## Local Development
+This contains everything you need to run your app locally.
 
-**Prerequisites**
-- Node.js 20+
-- npm 10+
+View your app in AI Studio: https://ai.studio/apps/drive/14qxAH9COO0VbgaX7oTwig59WTvcWvCm9
 
-**Steps**
-```fish
-npm install
-npm run dev
-```
+## Run Locally
 
-The dev server listens on http://localhost:5173. Environment variables can be provided via .env.local (e.g. GEMINI_API_KEY).
+**Prerequisites:**  Node.js
 
-## Build & Preview
-```fish
-npm run build
-npm run preview
-```
 
-The preview server emulates a production build locally. Use this before containerizing or pushing to ECR.
+1. Install dependencies:
+   `npm install`
+2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+3. Run the app:
+   `npm run dev`

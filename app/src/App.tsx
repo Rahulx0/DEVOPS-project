@@ -13,51 +13,48 @@ import ProductDetail from './components/ProductDetail';
 import WishlistView from './components/Wishlist';
 import ToastContainer from './components/Toast';
 import { AppView } from './lib/types';
-import Wishlist from "./components/Wishlist";
-import { Toaster } from "react-hot-toast";
 
-// Re-triggering CI/CD workflow
-function App() {
-  const [view, setView] = useState<AppView>('home');
-  const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
+const App: React.FC = () => {
+  const [view, setView] = useState<AppView>({ type: 'home' });
 
   const renderView = () => {
-    switch (view) {
-      case 'home':
-        return <Home setView={setView} />;
-      case 'products':
-        return <ProductsPage setView={setView} setSelectedProductId={setSelectedProductId} />;
+    switch (view.type) {
+      case 'apparel':
+        return <ProductsPage setView={setView} category="Apparel" />;
+      case 'sneakers':
+        return <ProductsPage setView={setView} category="Sneakers" />;
+      case 'product':
+        return <ProductDetail setView={setView} productId={view.id} />;
       case 'cart':
         return <CartView setView={setView} />;
+      case 'wishlist':
+        return <WishlistView setView={setView} />;
       case 'checkout':
         return <CheckoutView setView={setView} />;
       case 'success':
         return <SuccessView setView={setView} />;
-      case 'productDetail':
-        return <ProductDetail productId={selectedProductId} setView={setView} />;
-      case 'wishlist':
-        return <WishlistView setView={setView} />;
+      case 'home':
       default:
         return <Home setView={setView} />;
     }
   };
 
   return (
-    <CartProvider>
-      <WishlistProvider>
-        <ToastProvider>
+    <ToastProvider>
+      <CartProvider>
+        <WishlistProvider>
           <div className="bg-background text-text-dark font-sans min-h-screen flex flex-col">
             <Header setView={setView} />
             <main className="flex-grow pt-20">
               {renderView()}
             </main>
             <Footer />
-            <Toaster />
+            <ToastContainer />
           </div>
-        </ToastProvider>
-      </WishlistProvider>
-    </CartProvider>
+        </WishlistProvider>
+      </CartProvider>
+    </ToastProvider>
   );
-}
+};
 
 export default App;
