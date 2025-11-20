@@ -88,3 +88,4 @@ const CheckoutView: React.FC<CheckoutViewProps> = ({ setView }) => {
 };
 
 export default CheckoutView;
+// CI: pipeline test 2025-11-20

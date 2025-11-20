@@ -204,6 +204,7 @@ graph TD
     C --> D[Load Tests]
     D --> E[Security Tests]
     E --> F[Production Deployment]
+<!-- CI: pipeline test 2025-11-20 -->
 ```
 
 - **Unit Tests**: 80%+ code coverage with Jest

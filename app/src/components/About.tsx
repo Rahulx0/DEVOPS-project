@@ -32,3 +32,4 @@ const Home: React.FC<HomeProps> = ({ setView }) => {
 };
 
 export default Home;
+// CI: pipeline test 2025-11-20

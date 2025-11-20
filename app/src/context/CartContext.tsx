@@ -80,3 +80,4 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 };
+// CI: pipeline test 2025-11-20

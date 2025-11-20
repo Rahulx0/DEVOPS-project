@@ -87,3 +87,4 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, setView }) => 
 };
 
 export default ProductDetail;
+// CI: pipeline test 2025-11-20

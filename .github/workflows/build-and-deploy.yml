@@ -198,3 +198,5 @@ jobs:
         with:
           sarif_file: trivy-results.sarif
         continue-on-error: true
+
+# CI: pipeline test 2025-11-20

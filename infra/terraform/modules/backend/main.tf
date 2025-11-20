@@ -53,3 +53,5 @@ resource "aws_dynamodb_table" "terraform_locks" {
     Project     = "urbangear-ecommerce"
   }
 }
+
+# CI: pipeline test 2025-11-20

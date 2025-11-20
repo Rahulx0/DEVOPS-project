@@ -61,3 +61,4 @@ const CartView: React.FC<CartViewProps> = ({ setView }) => {
 };
 
 export default CartView;
+// CI: pipeline test 2025-11-20

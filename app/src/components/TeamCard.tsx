@@ -24,3 +24,4 @@ const CheckoutSummary: React.FC = () => {
 };
 
 export default CheckoutSummary;
+// CI: pipeline test 2025-11-20

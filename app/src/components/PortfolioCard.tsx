@@ -32,3 +32,4 @@ const CartItemRow: React.FC<CartItemRowProps> = ({ item }) => {
 };
 
 export default CartItemRow;
+// CI: pipeline test 2025-11-20

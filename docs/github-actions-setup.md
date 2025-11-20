@@ -3,6 +3,7 @@
 This guide explains how to configure GitHub Actions secrets and enable the CI/CD pipeline for the UrbanGear platform.
 
 ## 📋 Prerequisites
+<!-- CI: pipeline test 2025-11-20 -->
 
 Before setting up GitHub Actions, ensure you have:
 - ✅ GitHub repository created and code pushed

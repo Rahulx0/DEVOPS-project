@@ -82,3 +82,4 @@ The UrbanGear e-commerce platform is designed as a cloud-native application with
 - Encrypted Terraform state storage
 - Container image scanning
 - TLS termination at ingress level
+<!-- CI: pipeline test 2025-11-20 -->

@@ -229,3 +229,5 @@ resource "aws_iam_openid_connect_provider" "eks" {
     Project     = var.project_name
   }
 }
+
+# CI: pipeline test 2025-11-20

@@ -1,4 +1,5 @@
 # Quick Setup: GitHub Actions Secrets
+<!-- CI: pipeline test 2025-11-20 -->
 
 ## 🎯 What You Need to Do Right Now
 

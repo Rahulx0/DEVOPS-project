@@ -58,3 +58,4 @@ const App: React.FC = () => {
 };
 
 export default App;
+// CI: pipeline test 2025-11-20

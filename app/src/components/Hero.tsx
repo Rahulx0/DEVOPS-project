@@ -55,3 +55,4 @@ const Hero: React.FC<{ setView: (view: AppView) => void }> = ({ setView }) => {
 };
 
 export default Hero;
+// CI: pipeline test 2025-11-20

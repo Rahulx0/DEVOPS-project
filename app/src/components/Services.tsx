@@ -79,3 +79,4 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ category, setView }) => {
 };
 
 export default ProductsPage;
+// CI: pipeline test 2025-11-20

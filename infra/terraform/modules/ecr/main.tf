@@ -80,3 +80,5 @@ resource "aws_ecr_lifecycle_policy" "main" {
     ]
   })
 }
+
+# CI: pipeline test 2025-11-20

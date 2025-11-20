@@ -1,4 +1,5 @@
 # End-to-End Deployment Workflow Plan
+<!-- CI: pipeline test 2025-11-20 -->
 
 ## 1. Project Overview
 - **Product**: UrbanGear React storefront served via Vite

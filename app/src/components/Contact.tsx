@@ -27,3 +27,4 @@ const SuccessView: React.FC<SuccessViewProps> = ({ setView }) => {
 };
 
 export default SuccessView;
+// CI: pipeline test 2025-11-20

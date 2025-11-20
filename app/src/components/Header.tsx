@@ -96,3 +96,4 @@ const Header: React.FC<HeaderProps> = ({ setView }) => {
 };
 
 export default Header;
+// CI: pipeline test 2025-11-20

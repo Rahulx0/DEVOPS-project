@@ -105,3 +105,5 @@ jobs:
           cd infra/terraform
           terraform init -backend=false
           terraform validate
+
+# CI: pipeline test 2025-11-20

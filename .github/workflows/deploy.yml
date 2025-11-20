@@ -75,3 +75,5 @@ jobs:
       run: |
         kubectl rollout status deployment/urbangear-frontend
         kubectl get services -o wide
+
+# CI: pipeline test 2025-11-20

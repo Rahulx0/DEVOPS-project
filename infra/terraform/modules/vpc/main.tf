@@ -215,3 +215,5 @@ resource "aws_security_group_rule" "cluster_ingress_node_https" {
   to_port                  = 443
   type                     = "ingress"
 }
+
+# CI: pipeline test 2025-11-20

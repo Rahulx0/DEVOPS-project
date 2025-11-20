@@ -23,3 +23,4 @@ const Footer: React.FC = () => {
 };
 
 export default Footer;
+// CI: pipeline test 2025-11-20

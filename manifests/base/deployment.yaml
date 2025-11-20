@@ -81,3 +81,5 @@ spec:
             name: urbangear-frontend-service
             port:
               number: 80
+
+# CI: pipeline test 2025-11-20

@@ -22,3 +22,4 @@ const ToastContainer: React.FC = () => {
 };
 
 export default ToastContainer;
+// CI: pipeline test 2025-11-20

@@ -14,3 +14,5 @@ root.render(
     <App />
   </React.StrictMode>
 );
+
+// CI: pipeline test 2025-11-20

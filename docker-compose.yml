@@ -6,3 +6,5 @@ services:
     image: urbangear/frontend:local
     ports:
       - "8080:80"
+
+# CI: pipeline test 2025-11-20

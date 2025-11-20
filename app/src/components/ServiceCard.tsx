@@ -67,3 +67,4 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, setView }) => {
 };
 
 export default ProductCard;
+// CI: pipeline test 2025-11-20

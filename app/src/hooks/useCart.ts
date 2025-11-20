@@ -8,3 +8,5 @@ export const useCart = () => {
   }
   return context;
 };
+
+// CI: pipeline test 2025-11-20
