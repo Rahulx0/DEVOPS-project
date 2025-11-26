@@ -32,7 +32,7 @@ provider "aws" {
   }
 }
 
-# VPC and Networking
+# VPC and Networking - Cost Optimized
 module "vpc" {
   source = "../../modules/vpc"
   
@@ -42,10 +42,10 @@ module "vpc" {
   public_subnet_count = 2
   private_subnet_count = 2
   enable_nat_gateway  = true
-  nat_gateway_count   = 2
+  nat_gateway_count   = 1  # Single NAT gateway saves $0.045/hour
 }
 
-# EKS Cluster
+# EKS Cluster - Cost Optimized
 module "eks" {
   source = "../../modules/eks"
   
@@ -57,21 +57,23 @@ module "eks" {
   cluster_security_group_id = module.vpc.eks_cluster_security_group_id
   
   kubernetes_version = "1.28"
-  instance_types     = ["t3.medium"]
-  desired_capacity   = 2
-  max_capacity       = 4
+  instance_types     = ["t3.small"]  # $0.0208/hour vs t3.medium $0.0416/hour
+  desired_capacity   = 1             # Single node for demo
+  max_capacity       = 2
   min_capacity       = 1
+  capacity_type      = "SPOT"        # 70% cost savings
+  disk_size          = 20
 }
 
-# ECR Repository
+# ECR Repository - Cost Optimized
 module "ecr" {
   source = "../../modules/ecr"
   
   project_name         = var.project_name
   environment          = var.environment
   image_tag_mutability = "MUTABLE"
-  scan_on_push         = true
-  max_image_count      = 10
+  scan_on_push         = false  # Disable scanning to save costs
+  max_image_count      = 5      # Keep fewer images
 }
 
 # Future modules:
