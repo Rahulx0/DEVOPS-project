@@ -65,8 +65,27 @@ if ! git diff-index --quiet HEAD -- 2>/dev/null; then
         read -p "Commit message: " commit_msg
         git add .
         git commit -m "${commit_msg:-Deploy website}"
-        git push origin $CURRENT_BRANCH
-        echo "✓ Changes committed and pushed"
+        
+        # Try to push, handle conflicts
+        if ! git push origin $CURRENT_BRANCH 2>&1; then
+            echo ""
+            echo "⚠️  Push rejected - remote has changes."
+            echo ""
+            read -p "Pull and merge remote changes? (yes/no): " pull_changes
+            
+            if [ "$pull_changes" = "yes" ]; then
+                echo "Pulling remote changes..."
+                git pull --rebase origin $CURRENT_BRANCH
+                echo "Pushing changes..."
+                git push origin $CURRENT_BRANCH
+                echo "✓ Changes committed and pushed"
+            else
+                echo "⚠️  Skipping push. Using local code for workflow trigger."
+                echo "⚠️  Note: Workflow will use code from remote repository."
+            fi
+        else
+            echo "✓ Changes committed and pushed"
+        fi
         echo ""
     else
         echo "⚠️  Continuing with existing code..."
@@ -84,9 +103,28 @@ echo "Triggering 'Deploy On-Demand' workflow with action: deploy"
 echo ""
 
 # Trigger the workflow
-gh workflow run deploy-on-demand.yml \
-    --ref $CURRENT_BRANCH \
-    -f action=deploy
+if ! gh workflow run deploy-on-demand.yml --ref $CURRENT_BRANCH -f action=deploy 2>&1; then
+    echo ""
+    echo "❌ Failed to trigger workflow!"
+    echo ""
+    echo "Common issues:"
+    echo "  1. Workflow file not on default branch yet"
+    echo "  2. Workflow file not pushed to remote"
+    echo "  3. Workflow name mismatch"
+    echo ""
+    echo "Solutions:"
+    echo "  1. Push your changes to the default branch (main/master)"
+    echo "  2. Merge your branch to default branch"
+    echo "  3. Check workflow exists: gh workflow list"
+    echo ""
+    echo "Manual trigger:"
+    echo "  1. Go to: https://github.com/$REPO/actions"
+    echo "  2. Select 'Deploy On-Demand' workflow"
+    echo "  3. Click 'Run workflow'"
+    echo "  4. Choose action: deploy"
+    echo ""
+    exit 1
+fi
 
 echo "✓ Workflow triggered!"
 echo ""
