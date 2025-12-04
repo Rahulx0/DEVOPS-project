@@ -45,7 +45,7 @@ const SelectTrigger: React.FC<{ children: React.ReactNode; className?: string }>
       aria-expanded={open}
       aria-haspopup="listbox"
       className={cn(
-        'flex h-10 w-full items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-text-light focus:outline-none focus:ring-2 focus:ring-primary',
+        'flex h-10 w-full items-center justify-between rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-text-dark dark:text-gray-100 px-3 py-2 text-sm placeholder:text-text-light focus:outline-none focus:ring-2 focus:ring-primary transition-colors duration-300',
         className
       )}
     >
@@ -108,7 +108,7 @@ const SelectContent: React.FC<{ children: React.ReactNode; className?: string }>
             ref={contentRef}
             role="listbox"
             className={cn(
-                'absolute z-50 mt-1 w-full rounded-md border bg-white p-1 text-text-dark shadow-md animate-fade-in-up',
+                'absolute z-50 mt-1 w-full rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-1 text-text-dark dark:text-gray-100 shadow-md animate-fade-in-up',
                 'origin-top-right',
                 className
             )}
@@ -138,7 +138,7 @@ const SelectItem: React.FC<{ children: React.ReactNode; value: string; className
       aria-selected={isSelected}
       tabIndex={0}
       className={cn(
-        'relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none hover:bg-primary/10 focus:bg-primary/10',
+        'relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none hover:bg-primary/10 dark:hover:bg-gray-700 focus:bg-primary/10 dark:focus:bg-gray-700',
         isSelected && 'font-semibold',
         className
       )}

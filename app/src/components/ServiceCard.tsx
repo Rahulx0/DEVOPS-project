@@ -21,7 +21,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, setView }) => {
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
     addToCart(product);
-    showToast(`${product.name} added to cart`);
   };
 
   const handleWishlistToggle = (e: React.MouseEvent) => {
@@ -54,8 +53,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, setView }) => {
         </div>
       </CardHeader>
       <CardContent className="p-6 flex flex-col flex-grow">
-        <h3 className="text-lg font-heading font-bold mb-2 flex-grow text-text-dark">{product.name}</h3>
-        <p className="text-xl font-semibold text-text-light mb-4">₹{product.price.toLocaleString()}</p>
+        <h3 className="text-lg font-heading font-bold mb-2 flex-grow text-text-dark dark:text-white">{product.name}</h3>
+        <p className="text-xl font-semibold text-text-light dark:text-gray-300 mb-4">₹{product.price.toLocaleString()}</p>
       </CardContent>
       <CardFooter className="p-6 pt-0">
          <Button onClick={handleAddToCart} className="w-full">

@@ -18,25 +18,25 @@ const Hero: React.FC<{ setView: (view: AppView) => void }> = ({ setView }) => {
   });
 
   return (
-    <section id="home" className="bg-white overflow-hidden">
+    <section id="home" className="bg-white dark:bg-gray-900 overflow-hidden transition-colors duration-300">
       <div className="container mx-auto px-6 py-16 md:py-24">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div className="text-center md:text-left">
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-heading font-extrabold tracking-tighter leading-tight text-text-dark">
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-heading font-extrabold tracking-tighter leading-tight text-text-dark dark:text-white">
               <span className="block" style={getStyle(100)}>ELEVATE</span>
               <span className="block text-primary" style={getStyle(200)}>YOUR</span>
               <span className="block text-primary" style={getStyle(300)}>STREET STYLE</span>
             </h1>
-            <p style={getStyle(400)} className="mt-6 text-base sm:text-lg text-text-light max-w-md mx-auto md:mx-0">
-              Premium men's streetwear and exclusive sneakers. Curated collections for the modern
-              man who values quality, comfort, and authentic style.
+            <p style={getStyle(400)} className="mt-6 text-base sm:text-lg text-text-light dark:text-gray-300 max-w-md mx-auto md:mx-0">
+              Premium streetwear and exclusive sneakers. Curated collections for those
+              who value quality, comfort, and authentic style.
             </p>
             <div className="mt-8" style={getStyle(500)}>
               <Button 
                 size="lg"
                 onClick={() => setView({ type: 'apparel' })} >
                 <SparklesIcon className="w-5 h-5" />
-                <span>Shop Men's Collection</span>
+                <span>Shop latest Collection</span>
                 <ArrowRightIcon className="w-5 h-5" />
               </Button>
             </div>

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { products } from '../lib/data';
+import { useProducts } from '../hooks/useProducts';
 import { AppView } from '../lib/types';
 import ProductCard from './ServiceCard';
 import { SearchIcon } from '../constants';
@@ -13,6 +13,7 @@ interface ProductsPageProps {
 }
 
 const ProductsPage: React.FC<ProductsPageProps> = ({ category, setView }) => {
+  const { products, loading, error } = useProducts();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState('default');
 
@@ -32,12 +33,32 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ category, setView }) => {
     }
 
     return categoryProducts;
-  }, [category, searchTerm, sortOrder]);
+  }, [products, category, searchTerm, sortOrder]);
+
+  if (loading) {
+    return (
+      <section className="py-16 bg-white dark:bg-gray-900 transition-colors duration-300">
+        <div className="container mx-auto px-6 text-center">
+          <p className="text-xl text-text-light dark:text-gray-400">Loading products...</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="py-16 bg-white dark:bg-gray-900 transition-colors duration-300">
+        <div className="container mx-auto px-6 text-center">
+          <p className="text-xl text-red-500">{error}</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
-    <section className="py-16 bg-white">
+    <section className="py-16 bg-white dark:bg-gray-900 transition-colors duration-300">
       <div className="container mx-auto px-6">
-        <h2 className="text-4xl md:text-5xl font-heading font-bold mb-8 text-center text-primary">{category}</h2>
+        <h2 className="text-4xl md:text-5xl font-heading font-bold mb-8 text-center text-primary dark:text-white">{category}</h2>
         
         <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-4">
           <div className="relative w-full md:w-1/3">
@@ -71,7 +92,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ category, setView }) => {
             ))}
           </div>
         ) : (
-            <p className="text-center text-text-light text-xl">No products found.</p>
+            <p className="text-center text-text-light dark:text-gray-400 text-xl">No products found.</p>
         )}
       </div>
     </section>

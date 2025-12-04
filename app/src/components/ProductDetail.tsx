@@ -1,6 +1,6 @@
-import React from 'react';
-import { products } from '../lib/data';
-import { AppView } from '../lib/types';
+import React, { useState, useEffect } from 'react';
+import { getProductById } from '../lib/firebase';
+import { AppView, Product } from '../lib/types';
 import { useCart } from '../hooks/useCart';
 import { useWishlist } from '../hooks/useWishlist';
 import { useToast } from '../hooks/useToast';
@@ -13,10 +13,29 @@ interface ProductDetailProps {
 }
 
 const ProductDetail: React.FC<ProductDetailProps> = ({ productId, setView }) => {
-  const product = products.find(p => p.id === productId);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isWishlisted } = useWishlist();
   const showToast = useToast();
+
+  useEffect(() => {
+    async function fetchProduct() {
+      setLoading(true);
+      const data = await getProductById(productId);
+      setProduct(data);
+      setLoading(false);
+    }
+    fetchProduct();
+  }, [productId]);
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-6 py-16 text-center">
+        <p className="text-xl text-text-light">Loading...</p>
+      </div>
+    );
+  }
   
   if (!product) {
     return (

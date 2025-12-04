@@ -21,4 +21,5 @@ export type AppView =
   | { type: 'checkout' }
   | { type: 'success' }
   | { type: 'wishlist' }
-  | { type: 'product', id: number };
+  | { type: 'product', id: number }
+  | { type: 'admin' };
