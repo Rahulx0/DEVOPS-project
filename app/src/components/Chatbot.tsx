@@ -73,7 +73,9 @@ const Chatbot: React.FC = () => {
         throw new Error('NVIDIA API key not configured');
       }
 
-      const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
+      // Use nginx proxy in production, direct in dev
+      const apiUrl = '/api/nvidia/v1/chat/completions';
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
