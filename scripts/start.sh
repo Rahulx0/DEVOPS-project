@@ -95,22 +95,17 @@ echo "📦 Pods:"
 kubectl get pods -l app=urbangear-frontend
 echo ""
 
-# Check for LoadBalancer
-echo "🌐 Checking service..."
-LB_URL=$(kubectl get svc urbangear-frontend -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || echo "")
-
-if [ -n "$LB_URL" ]; then
-    echo ""
-    echo "🎉 Your website is live at:"
-    echo "   http://$LB_URL"
-    echo ""
-else
-    echo ""
-    echo "Starting port-forward (LoadBalancer not available)..."
-    echo ""
-    echo "🌐 Access your website at: http://localhost:8080"
-    echo ""
-    echo "Press Ctrl+C to stop"
-    echo ""
-    kubectl port-forward svc/urbangear-frontend 8080:80
-fi
+# Start port-forward
+echo ""
+echo "🌐 Starting port-forward..."
+echo ""
+echo "=========================================="
+echo "🎉 Your website is available at:"
+echo "   http://localhost:8080"
+echo ""
+echo "   Admin panel: http://localhost:8080/?admin=true"
+echo "=========================================="
+echo ""
+echo "Press Ctrl+C to stop"
+echo ""
+kubectl port-forward svc/urbangear-frontend 8080:80
