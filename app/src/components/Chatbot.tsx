@@ -66,8 +66,13 @@ const Chatbot: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Use Vite proxy to bypass CORS
-      const response = await fetch('/api/nvidia/v1/chat/completions', {
+      // Use Vite proxy in dev, CORS proxy in production
+      const isDev = import.meta.env.DEV;
+      const apiUrl = isDev 
+        ? '/api/nvidia/v1/chat/completions'
+        : `https://corsproxy.io/?${encodeURIComponent('https://integrate.api.nvidia.com/v1/chat/completions')}`;
+      
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
