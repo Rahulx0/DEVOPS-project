@@ -66,17 +66,18 @@ const Chatbot: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Use Vite proxy in dev, CORS proxy in production
-      const isDev = import.meta.env.DEV;
-      const apiUrl = isDev 
-        ? '/api/nvidia/v1/chat/completions'
-        : `https://corsproxy.io/?${encodeURIComponent('https://integrate.api.nvidia.com/v1/chat/completions')}`;
+      const apiKey = import.meta.env.VITE_NVIDIA_API_KEY;
+      console.log('API Key available:', !!apiKey, apiKey?.substring(0, 10) + '...');
       
-      const response = await fetch(apiUrl, {
+      if (!apiKey) {
+        throw new Error('NVIDIA API key not configured');
+      }
+
+      const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_NVIDIA_API_KEY}`
+          'Authorization': `Bearer ${apiKey}`
         },
         body: JSON.stringify({
           model: 'meta/llama-3.1-8b-instruct',
@@ -91,6 +92,8 @@ const Chatbot: React.FC = () => {
         })
       });
 
+      console.log('Response status:', response.status);
+
       if (!response.ok) {
         const errorText = await response.text();
         console.error('API Error:', response.status, errorText);
@@ -98,6 +101,7 @@ const Chatbot: React.FC = () => {
       }
 
       const data = await response.json();
+      console.log('Response data:', data);
       
       if (data.choices && data.choices[0]?.message?.content) {
         const assistantMessage: Message = {
