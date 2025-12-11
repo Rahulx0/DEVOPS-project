@@ -12,16 +12,16 @@ terraform {
   
   # Backend configuration - created by bootstrap
   backend "s3" {
-    bucket         = "urbangear-terraform-state-cda6af11"
+    bucket         = "urbangear"
     key            = "envs/dev/terraform.tfstate"
-    region         = "us-west-2"
-    dynamodb_table = "urbangear-terraform-locks"
+    region         = "us-east-1"
+    dynamodb_table = "urbangear"
     encrypt        = true
   }
 }
 
 provider "aws" {
-  region = var.aws_region
+  region = "us-east-1"
   
   default_tags {
     tags = {

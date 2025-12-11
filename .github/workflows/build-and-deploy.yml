@@ -11,7 +11,7 @@ on:
       - rahul
 
 env:
-  AWS_REGION: ${{ secrets.AWS_REGION || 'us-west-2' }}
+  AWS_REGION: ${{ secrets.AWS_REGION || 'us-east-1' }}
   ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY || 'urbangear-dev-frontend' }}
   EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME || 'urbangear-dev-cluster' }}
   KUBE_NAMESPACE: default
@@ -91,7 +91,7 @@ jobs:
 
       - name: Update deployment manifest
         run: |
-          sed -i 's|484907531725.dkr.ecr.us-west-2.amazonaws.com/urbangear-dev-frontend:latest|${{ steps.image.outputs.uri }}|g' manifests/overlays/prod/deployment-patch.yaml
+          sed -i 's|924612597584.dkr.ecr.us-east-1.amazonaws.com/urbangear-dev-frontend:latest|${{ steps.image.outputs.uri }}|g' manifests/overlays/prod/deployment-patch.yaml
 
       - name: Upload updated manifest
         uses: actions/upload-artifact@v4

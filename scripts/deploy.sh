@@ -4,7 +4,7 @@
 set -e
 
 export AWS_PAGER=""
-AWS_REGION="${AWS_REGION:-us-west-2}"
+AWS_REGION="${AWS_REGION:-us-east-1}"
 EKS_CLUSTER="urbangear-dev-cluster"
 
 echo "🚀 Deploying Website"
