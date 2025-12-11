@@ -32,7 +32,10 @@ if [ "$CLUSTER_STATUS" = "NOT_FOUND" ]; then
     echo ""
     
     # Initialize and apply Terraform
-    cd "infra/terraform/envs/dev"
+    SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+    WORKSPACE_ROOT="$( cd "$SCRIPT_DIR/.." && pwd )"
+    
+    cd "$WORKSPACE_ROOT/infra/terraform/envs/dev"
     
     echo "Step 1: Initializing Terraform..."
     terraform init -input=false
@@ -43,7 +46,7 @@ if [ "$CLUSTER_STATUS" = "NOT_FOUND" ]; then
     
     echo ""
     echo "✅ Infrastructure created!"
-    cd - > /dev/null
+    cd "$WORKSPACE_ROOT"
     
 elif [ "$CLUSTER_STATUS" = "ACTIVE" ]; then
     echo "✅ Cluster is already running"
@@ -63,6 +66,12 @@ echo ""
 
 # Create fake commit and trigger workflow
 echo "Step 3: Triggering deployment workflow..."
+
+# Ensure we're in the workspace root for git operations
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+WORKSPACE_ROOT="$( cd "$SCRIPT_DIR/.." && pwd )"
+cd "$WORKSPACE_ROOT"
+
 git add . 2>/dev/null || true
 git commit -m "Deploy: $(date '+%Y-%m-%d %H:%M:%S')" 2>/dev/null || echo "No new changes to commit"
 git push origin rahul 2>/dev/null || echo "Already up to date"
