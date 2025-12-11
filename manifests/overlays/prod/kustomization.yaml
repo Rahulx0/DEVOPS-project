@@ -9,7 +9,7 @@ patches:
 
 replicas:
 - name: urbangear-frontend
-  count: 3
+  count: 1
 
 labels:
 - pairs:
