@@ -50,14 +50,17 @@ else
 fi
 
 # Confirm destruction
-echo "⚠️  WARNING: This will destroy ALL AWS resources and stop the website!"
+echo "⚠️  WARNING: This will destroy AWS resources and stop the website!"
 echo ""
 echo "Resources to be destroyed:"
 echo "   • EKS Cluster ($EKS_CLUSTER)"
 echo "   • VPC and networking components"
 echo "   • ECR repository ($ECR_REPO)"
-echo "   • Load balancers and security groups"
 echo "   • NAT Gateway and Elastic IPs"
+echo ""
+echo "Resources that will be PRESERVED:"
+echo "   • Persistent Load Balancer (urbangear-persistent-alb)"
+echo "   • Domain DNS configuration"
 echo ""
 read -p "Are you sure you want to continue? (yes/no): " confirm
 
@@ -180,14 +183,16 @@ cleanup_aws_resources_manual() {
     if [ "$VPC_ID" != "None" ] && [ "$VPC_ID" != "null" ]; then
         echo "   Found VPC: $VPC_ID"
         
-        # Delete any remaining load balancers
-        echo "   Cleaning up load balancers..."
-        aws elbv2 describe-load-balancers --region $AWS_REGION --query "LoadBalancers[?VpcId=='$VPC_ID'].LoadBalancerArn" --output text 2>/dev/null | tr '\t' '\n' | while read -r LB_ARN; do
+        # Delete load balancers (except persistent ALB)
+        echo "   Cleaning up temporary load balancers..."
+        aws elbv2 describe-load-balancers --region $AWS_REGION --query "LoadBalancers[?VpcId=='$VPC_ID' && LoadBalancerName!='urbangear-persistent-alb'].LoadBalancerArn" --output text 2>/dev/null | tr '\t' '\n' | while read -r LB_ARN; do
             if [ -n "$LB_ARN" ] && [ "$LB_ARN" != "None" ]; then
-                echo "     Deleting load balancer: $LB_ARN"
+                echo "     Deleting temporary load balancer: $LB_ARN"
                 aws elbv2 delete-load-balancer --load-balancer-arn "$LB_ARN" --region $AWS_REGION 2>/dev/null || true
             fi
         done
+        
+        echo "   Preserving persistent ALB: urbangear-persistent-alb"
         
         # Wait for load balancers to be deleted
         sleep 90
