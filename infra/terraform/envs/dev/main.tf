@@ -12,11 +12,10 @@ terraform {
   
   # Backend configuration - created by bootstrap
   backend "s3" {
-    bucket         = "urbangear"
-    key            = "envs/dev/terraform.tfstate"
-    region         = "us-east-1"
-    dynamodb_table = "urbangear"
-    encrypt        = true
+    bucket = "urbangear"
+    key    = "envs/dev/terraform.tfstate"
+    region = "us-east-1"
+    encrypt = true
   }
 }
 

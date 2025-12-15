@@ -17,7 +17,9 @@ Deploys the application and provides the live external URL.
 - Builds and deploys the application
 - Provides the external URL where your website is live
 
-**Output:** External URL like `http://a957fffba63a0404da30cee457d1b2ac-1445347431.us-east-1.elb.amazonaws.com`
+**Output:** 
+- External URL: `http://a957fffba63a0404da30cee457d1b2ac-1445347431.us-east-1.elb.amazonaws.com`
+- Custom domain: `http://urbangear.qzz.io` (automatically configured)
 
 ### `stop.sh` - Stop Website & Destroy Resources
 Destroys all AWS resources to stop costs.

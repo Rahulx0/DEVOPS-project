@@ -7,6 +7,7 @@ export AWS_PAGER=""
 AWS_REGION="${AWS_REGION:-us-east-1}"
 EKS_CLUSTER="urbangear-dev-cluster"
 ECR_REPO="urbangear-dev-frontend"
+DOMAIN_NAME="urbangear.qzz.io"
 
 echo "========================================"
 echo "🛑 Stopping UrbanGear & Destroying Resources"
@@ -93,6 +94,51 @@ cleanup_kubernetes() {
         echo "✅ Kubernetes resources cleaned up"
         echo ""
     fi
+}
+
+# Function to cleanup Auto Scaling Groups and EC2 instances
+cleanup_autoscaling_and_instances() {
+    echo "Step 1.5: Cleaning up Auto Scaling Groups and EC2 instances..."
+    
+    # Find and delete Auto Scaling Groups related to our EKS cluster
+    ASG_NAMES=$(aws autoscaling describe-auto-scaling-groups --region $AWS_REGION --query "AutoScalingGroups[?contains(AutoScalingGroupName, 'urbangear-dev-nodes')].AutoScalingGroupName" --output text 2>/dev/null || echo "")
+    
+    if [ -n "$ASG_NAMES" ]; then
+        for ASG_NAME in $ASG_NAMES; do
+            echo "   Scaling down ASG: $ASG_NAME"
+            aws autoscaling update-auto-scaling-group --auto-scaling-group-name "$ASG_NAME" --min-size 0 --desired-capacity 0 --region $AWS_REGION 2>/dev/null || true
+            
+            echo "   Waiting for instances to terminate..."
+            sleep 30
+            
+            echo "   Deleting ASG: $ASG_NAME"
+            aws autoscaling delete-auto-scaling-group --auto-scaling-group-name "$ASG_NAME" --force-delete --region $AWS_REGION 2>/dev/null || true
+        done
+    fi
+    
+    # Terminate any remaining EC2 instances related to our cluster
+    INSTANCE_IDS=$(aws ec2 describe-instances --region $AWS_REGION --filters "Name=tag:eks:cluster-name,Values=urbangear-dev-cluster" "Name=instance-state-name,Values=running,pending" --query 'Reservations[*].Instances[*].InstanceId' --output text 2>/dev/null || echo "")
+    
+    if [ -n "$INSTANCE_IDS" ] && [ "$INSTANCE_IDS" != "None" ]; then
+        echo "   Terminating EC2 instances: $INSTANCE_IDS"
+        aws ec2 terminate-instances --instance-ids $INSTANCE_IDS --region $AWS_REGION 2>/dev/null || true
+        
+        echo "   Waiting for instances to terminate..."
+        sleep 60
+    fi
+    
+    # Delete launch templates
+    LAUNCH_TEMPLATE_IDS=$(aws ec2 describe-launch-templates --region $AWS_REGION --query "LaunchTemplates[?contains(LaunchTemplateName, 'eks-') && contains(LaunchTemplateName, 'urbangear')].LaunchTemplateId" --output text 2>/dev/null || echo "")
+    
+    if [ -n "$LAUNCH_TEMPLATE_IDS" ] && [ "$LAUNCH_TEMPLATE_IDS" != "None" ]; then
+        for LT_ID in $LAUNCH_TEMPLATE_IDS; do
+            echo "   Deleting launch template: $LT_ID"
+            aws ec2 delete-launch-template --launch-template-id "$LT_ID" --region $AWS_REGION 2>/dev/null || true
+        done
+    fi
+    
+    echo "✅ Auto Scaling Groups and EC2 instances cleaned up"
+    echo ""
 }
 
 # Function to cleanup ECR repository
@@ -236,8 +282,60 @@ cleanup_aws_resources_manual() {
     echo ""
 }
 
+# Function to cleanup DNS records
+cleanup_dns() {
+    echo "Step 0: Cleaning up DNS records..."
+    
+    # Check if domain uses Route 53
+    HOSTED_ZONE_ID=$(aws route53 list-hosted-zones --query "HostedZones[?contains(Name, 'qzz.io')].Id" --output text 2>/dev/null | head -1 || echo "")
+    
+    if [ -n "$HOSTED_ZONE_ID" ] && [ "$HOSTED_ZONE_ID" != "None" ]; then
+        echo "   Found Route 53 hosted zone: $HOSTED_ZONE_ID"
+        
+        # Check if DNS record exists
+        EXISTING_RECORD=$(aws route53 list-resource-record-sets --hosted-zone-id "$HOSTED_ZONE_ID" --query "ResourceRecordSets[?Name=='$DOMAIN_NAME.'].ResourceRecords[0].Value" --output text 2>/dev/null || echo "")
+        
+        if [ -n "$EXISTING_RECORD" ] && [ "$EXISTING_RECORD" != "None" ]; then
+            echo "   Deleting DNS record for $DOMAIN_NAME..."
+            
+            cat > /tmp/dns-delete.json << EOF
+{
+    "Changes": [
+        {
+            "Action": "DELETE",
+            "ResourceRecordSet": {
+                "Name": "$DOMAIN_NAME",
+                "Type": "CNAME",
+                "TTL": 300,
+                "ResourceRecords": [
+                    {
+                        "Value": "$EXISTING_RECORD"
+                    }
+                ]
+            }
+        }
+    ]
+}
+EOF
+
+            aws route53 change-resource-record-sets --hosted-zone-id "$HOSTED_ZONE_ID" --change-batch file:///tmp/dns-delete.json >/dev/null 2>&1 || true
+            rm -f /tmp/dns-delete.json
+            echo "   DNS record deleted"
+        else
+            echo "   No DNS record found for $DOMAIN_NAME"
+        fi
+    else
+        echo "   No Route 53 hosted zone found (manual DNS cleanup may be required)"
+    fi
+    
+    echo "✅ DNS cleanup completed"
+    echo ""
+}
+
 # Execute cleanup steps
+cleanup_dns
 cleanup_kubernetes
+cleanup_autoscaling_and_instances
 cleanup_ecr
 
 # Try Terraform destroy first
@@ -256,6 +354,39 @@ timeout 300 terraform destroy -auto-approve 2>/dev/null || {
 }
 
 cd "$WORKSPACE_ROOT"
+
+echo ""
+echo "========================================"
+echo "🔍 Final Resource Verification"
+echo "========================================"
+echo ""
+
+# Verify all resources are cleaned up
+echo "Checking for remaining resources..."
+
+# Check EKS cluster
+CLUSTER_CHECK=$(aws eks describe-cluster --name $EKS_CLUSTER --region $AWS_REGION --query 'cluster.status' --output text 2>/dev/null || echo "NOT_FOUND")
+echo "   EKS Cluster: $CLUSTER_CHECK"
+
+# Check VPC
+VPC_CHECK=$(aws ec2 describe-vpcs --filters "Name=tag:Project,Values=urbangear" --region $AWS_REGION --query 'Vpcs[0].VpcId' --output text 2>/dev/null || echo "None")
+echo "   VPC: $VPC_CHECK"
+
+# Check ECR
+ECR_CHECK=$(aws ecr describe-repositories --repository-names $ECR_REPO --region $AWS_REGION --query 'repositories[0].repositoryName' --output text 2>/dev/null || echo "None")
+echo "   ECR Repository: $ECR_CHECK"
+
+# Check EC2 instances
+INSTANCE_CHECK=$(aws ec2 describe-instances --region $AWS_REGION --filters "Name=tag:eks:cluster-name,Values=urbangear-dev-cluster" "Name=instance-state-name,Values=running,pending" --query 'Reservations[*].Instances[*].InstanceId' --output text 2>/dev/null || echo "None")
+echo "   EC2 Instances: ${INSTANCE_CHECK:-None}"
+
+# Check Auto Scaling Groups
+ASG_CHECK=$(aws autoscaling describe-auto-scaling-groups --region $AWS_REGION --query "AutoScalingGroups[?contains(AutoScalingGroupName, 'urbangear-dev-nodes')].AutoScalingGroupName" --output text 2>/dev/null || echo "None")
+echo "   Auto Scaling Groups: ${ASG_CHECK:-None}"
+
+# Check Load Balancers
+LB_CHECK=$(aws elbv2 describe-load-balancers --region $AWS_REGION --query "LoadBalancers[?contains(LoadBalancerName, 'k8s-default') || contains(LoadBalancerName, 'urbangear')].LoadBalancerName" --output text 2>/dev/null || echo "None")
+echo "   Load Balancers: ${LB_CHECK:-None}"
 
 echo ""
 echo "========================================"
