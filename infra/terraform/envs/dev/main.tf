@@ -44,6 +44,8 @@ module "vpc" {
   nat_gateway_count   = 1  # Single NAT gateway saves $0.045/hour
 }
 
+
+
 # EKS Cluster - Cost Optimized
 module "eks" {
   source = "../../modules/eks"
