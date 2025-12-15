@@ -180,12 +180,21 @@ cleanup_aws_resources_manual() {
     if [ "$VPC_ID" != "None" ] && [ "$VPC_ID" != "null" ]; then
         echo "   Found VPC: $VPC_ID"
         
-        # Delete any remaining load balancers
-        echo "   Cleaning up load balancers..."
+        # Delete any remaining load balancers (ALB/NLB)
+        echo "   Cleaning up Application/Network Load Balancers..."
         aws elbv2 describe-load-balancers --region $AWS_REGION --query "LoadBalancers[?VpcId=='$VPC_ID'].LoadBalancerArn" --output text 2>/dev/null | tr '\t' '\n' | while read -r LB_ARN; do
             if [ -n "$LB_ARN" ] && [ "$LB_ARN" != "None" ]; then
-                echo "     Deleting load balancer: $LB_ARN"
+                echo "     Deleting ALB/NLB: $LB_ARN"
                 aws elbv2 delete-load-balancer --load-balancer-arn "$LB_ARN" --region $AWS_REGION 2>/dev/null || true
+            fi
+        done
+        
+        # Delete any remaining Classic Load Balancers (ELB v1) - THESE COST MONEY!
+        echo "   Cleaning up Classic Load Balancers..."
+        aws elb describe-load-balancers --region $AWS_REGION --query "LoadBalancerDescriptions[?VPCId=='$VPC_ID'].LoadBalancerName" --output text 2>/dev/null | tr '\t' '\n' | while read -r LB_NAME; do
+            if [ -n "$LB_NAME" ] && [ "$LB_NAME" != "None" ]; then
+                echo "     Deleting Classic LB: $LB_NAME (💰 COST SAVER!)"
+                aws elb delete-load-balancer --load-balancer-name "$LB_NAME" --region $AWS_REGION 2>/dev/null || true
             fi
         done
         
@@ -261,11 +270,20 @@ cleanup_aws_resources_manual() {
         
         sleep 30
         
-        # Delete security groups (except default)
+        # Delete security groups (except default) - including ELB security groups
         echo "   Deleting security groups..."
         aws ec2 describe-security-groups --filters "Name=vpc-id,Values=$VPC_ID" --region $AWS_REGION --query 'SecurityGroups[?GroupName!=`default`].GroupId' --output text 2>/dev/null | tr '\t' '\n' | while read -r SG_ID; do
             if [ -n "$SG_ID" ] && [ "$SG_ID" != "None" ]; then
                 echo "     Deleting security group: $SG_ID"
+                aws ec2 delete-security-group --group-id "$SG_ID" --region $AWS_REGION 2>/dev/null || true
+            fi
+        done
+        
+        # Extra cleanup for ELB-created security groups (these can be missed)
+        echo "   Cleaning up ELB-created security groups..."
+        aws ec2 describe-security-groups --filters "Name=vpc-id,Values=$VPC_ID" "Name=group-name,Values=k8s-elb-*" --region $AWS_REGION --query 'SecurityGroups[].GroupId' --output text 2>/dev/null | tr '\t' '\n' | while read -r SG_ID; do
+            if [ -n "$SG_ID" ] && [ "$SG_ID" != "None" ]; then
+                echo "     Deleting ELB security group: $SG_ID"
                 aws ec2 delete-security-group --group-id "$SG_ID" --region $AWS_REGION 2>/dev/null || true
             fi
         done
@@ -384,16 +402,32 @@ echo "   EC2 Instances: ${INSTANCE_CHECK:-None}"
 ASG_CHECK=$(aws autoscaling describe-auto-scaling-groups --region $AWS_REGION --query "AutoScalingGroups[?contains(AutoScalingGroupName, 'urbangear-dev-nodes')].AutoScalingGroupName" --output text 2>/dev/null || echo "None")
 echo "   Auto Scaling Groups: ${ASG_CHECK:-None}"
 
-# Check Load Balancers
-LB_CHECK=$(aws elbv2 describe-load-balancers --region $AWS_REGION --query "LoadBalancers[?contains(LoadBalancerName, 'k8s-default') || contains(LoadBalancerName, 'urbangear')].LoadBalancerName" --output text 2>/dev/null || echo "None")
-echo "   Load Balancers: ${LB_CHECK:-None}"
+# Check Application/Network Load Balancers
+ALB_CHECK=$(aws elbv2 describe-load-balancers --region $AWS_REGION --query "LoadBalancers[?contains(LoadBalancerName, 'k8s-default') || contains(LoadBalancerName, 'urbangear')].LoadBalancerName" --output text 2>/dev/null || echo "None")
+echo "   ALB/NLB Load Balancers: ${ALB_CHECK:-None}"
+
+# Check Classic Load Balancers (these cost money!)
+ELB_CHECK=$(aws elb describe-load-balancers --region $AWS_REGION --query "LoadBalancerDescriptions[?contains(LoadBalancerName, 'k8s') || contains(LoadBalancerName, 'urbangear') || contains(LoadBalancerName, 'a957fff') || contains(LoadBalancerName, 'a1e9436') || contains(LoadBalancerName, 'a328b41')].LoadBalancerName" --output text 2>/dev/null || echo "None")
+echo "   Classic Load Balancers: ${ELB_CHECK:-None}"
+if [ "$ELB_CHECK" != "None" ] && [ -n "$ELB_CHECK" ]; then
+    echo "   ⚠️  WARNING: Classic Load Balancers found - these cost ~$18/month!"
+fi
 
 echo ""
 echo "========================================"
 echo "✅ Resource Destruction Complete!"
 echo "========================================"
 echo ""
-echo "💰 Cost savings: All AWS resources stopped"
+
+# Final cost verification
+if [ "$ELB_CHECK" = "None" ] && [ "$CLUSTER_CHECK" = "NOT_FOUND" ] && [ "$VPC_CHECK" = "None" ] && [ "$ECR_CHECK" = "None" ] && [ "$INSTANCE_CHECK" = "None" ] && [ "$ASG_CHECK" = "None" ]; then
+    echo "💰 ✅ COST STATUS: $0/hour - All billable resources destroyed!"
+    echo "🎉 Perfect cleanup - No ongoing AWS charges!"
+else
+    echo "⚠️  Some resources may still be running - check the list above"
+fi
+
+echo ""
 echo "🌐 Website is no longer accessible"
 echo ""
 echo "To restart the website, run: ./scripts/start.sh"
