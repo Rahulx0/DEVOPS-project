@@ -182,10 +182,32 @@ kubectl patch svc urbangear-frontend -p '{"spec":{"type":"NodePort"}}' 2>/dev/nu
 
 # Register EKS nodes with ALB target group
 echo "   Registering nodes with ALB..."
+
+# Wait for service to get NodePort
+sleep 10
+NODEPORT=$(kubectl get svc urbangear-frontend -o jsonpath='{.spec.ports[0].nodePort}')
 NODE_IPS=$(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="InternalIP")].address}')
-for NODE_IP in $NODE_IPS; do
-    aws elbv2 register-targets --target-group-arn "$TARGET_GROUP_ARN" --targets Id="$NODE_IP",Port=30000 --region $AWS_REGION 2>/dev/null || true
+
+echo "   NodePort: $NODEPORT"
+
+# Deregister any existing targets first
+aws elbv2 describe-target-health --target-group-arn "$TARGET_GROUP_ARN" --region $AWS_REGION --query 'TargetHealthDescriptions[].Target' --output json 2>/dev/null | jq -r '.[] | "\(.Id),\(.Port)"' 2>/dev/null | while read target; do
+    if [ -n "$target" ]; then
+        IFS=',' read -r ip port <<< "$target"
+        echo "   Deregistering old target: $ip:$port"
+        aws elbv2 deregister-targets --target-group-arn "$TARGET_GROUP_ARN" --targets Id="$ip",Port="$port" --region $AWS_REGION 2>/dev/null || true
+    fi
 done
+
+# Register nodes with correct NodePort
+for NODE_IP in $NODE_IPS; do
+    echo "   Registering node: $NODE_IP:$NODEPORT"
+    aws elbv2 register-targets --target-group-arn "$TARGET_GROUP_ARN" --targets Id="$NODE_IP",Port="$NODEPORT" --region $AWS_REGION 2>/dev/null || true
+done
+
+# Wait for targets to become healthy
+echo "   Waiting for targets to become healthy..."
+sleep 60
 
 # Get the persistent external URL
 EXTERNAL_IP="$PERSISTENT_LB"
@@ -314,8 +336,28 @@ EOF
         fi
     fi
     
+    # Verify ALB health
+    echo "🔍 Verifying Load Balancer health..."
+    for i in {1..10}; do
+        HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://$EXTERNAL_IP" || echo "000")
+        if [ "$HTTP_STATUS" = "200" ]; then
+            echo "✅ Load Balancer is healthy (HTTP $HTTP_STATUS)"
+            break
+        else
+            echo "   Checking health... ($i/10) - HTTP $HTTP_STATUS"
+            sleep 30
+        fi
+    done
+
+    if [ "$HTTP_STATUS" != "200" ]; then
+        echo "⚠️  Load Balancer health check failed. Checking target health..."
+        aws elbv2 describe-target-health --target-group-arn "$TARGET_GROUP_ARN" --region $AWS_REGION --output table 2>/dev/null || echo "   Could not check target health"
+    fi
+
+    echo ""
     echo "✅ Website is running with 1 pod"
     echo "💰 Cost-optimized: Single t3.small spot instance"
+    echo "🔗 Persistent Load Balancer: Never changes address!"
 else
     echo "⚠️  Could not get external IP. Check LoadBalancer status:"
     kubectl get svc urbangear-frontend
