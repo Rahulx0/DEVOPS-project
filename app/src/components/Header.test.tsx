@@ -259,4 +259,29 @@ describe('Header Component', () => {
       expect(mockSetView).toHaveBeenCalledWith({ type: 'cart' });
     }
   });
+
+  it('should show mobile cart badge when items in cart', () => {
+    render(<Header setView={mockSetView} />, { wrapper: WrapperWithItems });
+
+    // Find all badges with count "2" (cart count)
+    const badges = screen.getAllByText('2');
+    // Should have at least 2 badges (desktop and mobile)
+    expect(badges.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('should not show mobile cart badge when cart is empty', () => {
+    render(<Header setView={mockSetView} />, { wrapper });
+
+    // Find the mobile cart button area
+    const buttons = screen.getAllByRole('button');
+    const mobileCartButton = buttons.find(btn => 
+      btn.className.includes('relative') && btn.className.includes('mr-2')
+    );
+    
+    if (mobileCartButton) {
+      // Should not have a badge span inside
+      const badge = mobileCartButton.querySelector('span.absolute');
+      expect(badge).toBeNull();
+    }
+  });
 });

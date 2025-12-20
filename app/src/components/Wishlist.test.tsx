@@ -129,4 +129,56 @@ describe('WishlistView Component', () => {
       }
     }
   });
+
+  // Test with full context to cover handleMoveToCart and handleRemove with showToast
+  const renderWithFullContext = () => {
+    const mockRemoveFromWishlist = vi.fn();
+    
+    return {
+      ...render(
+        <ThemeProvider>
+          <ToastProvider>
+            <WishlistContext.Provider value={{
+              wishlistItems: [
+                { id: 1, name: 'Test Item', price: 100, image: 'img.jpg', category: 'Apparel', description: 'Desc' }
+              ],
+              addToWishlist: vi.fn(),
+              removeFromWishlist: mockRemoveFromWishlist,
+              isWishlisted: vi.fn(() => true),
+              wishlistCount: 1
+            }}>
+              <CartProvider>
+                <WishlistView setView={mockSetView} />
+              </CartProvider>
+            </WishlistContext.Provider>
+          </ToastProvider>
+        </ThemeProvider>
+      ),
+      mockRemoveFromWishlist
+    };
+  };
+
+  it('should call handleMoveToCart which adds to cart and removes from wishlist', () => {
+    const { mockRemoveFromWishlist } = renderWithFullContext();
+    
+    const moveButton = screen.getByRole('button', { name: /Move to Cart/ });
+    fireEvent.click(moveButton);
+    
+    // Should remove from wishlist after adding to cart
+    expect(mockRemoveFromWishlist).toHaveBeenCalledWith(1);
+  });
+
+  it('should call handleRemove which removes from wishlist', () => {
+    const { mockRemoveFromWishlist } = renderWithFullContext();
+    
+    // Find the destructive button (trash icon)
+    const buttons = screen.getAllByRole('button');
+    const trashButton = buttons.find(btn => btn.className.includes('destructive'));
+    
+    expect(trashButton).toBeDefined();
+    if (trashButton) {
+      fireEvent.click(trashButton);
+      expect(mockRemoveFromWishlist).toHaveBeenCalledWith(1);
+    }
+  });
 });

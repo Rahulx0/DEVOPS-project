@@ -1,7 +1,16 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import React from 'react';
 import { Sheet, SheetTrigger, SheetContent, SheetHeader } from './Sheet';
+
+// Test component that uses SheetTrigger outside of Sheet context
+const SheetTriggerWithoutContext = () => {
+  return (
+    <SheetTrigger asChild>
+      <button>Orphan Trigger</button>
+    </SheetTrigger>
+  );
+};
 
 describe('Sheet Component', () => {
   beforeEach(() => {
@@ -282,5 +291,86 @@ describe('Sheet Component', () => {
     fireEvent.keyDown(document, { key: 'Enter' });
 
     expect(onOpenChange).not.toHaveBeenCalled();
+  });
+
+  it('should throw error when useSheetContext is used outside Sheet', () => {
+    // Suppress console.error for this test since we expect an error
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    
+    expect(() => {
+      render(<SheetTriggerWithoutContext />);
+    }).toThrow('useSheetContext must be used within a Sheet');
+    
+    consoleSpy.mockRestore();
+  });
+
+  it('should handle animation state during close', async () => {
+    const onOpenChange = vi.fn();
+    const { rerender } = render(
+      <Sheet open={true} onOpenChange={onOpenChange}>
+        <SheetTrigger asChild>
+          <button>Open Sheet</button>
+        </SheetTrigger>
+        <SheetContent>
+          <div>Sheet Content</div>
+        </SheetContent>
+      </Sheet>
+    );
+
+    expect(screen.getByText('Sheet Content')).toBeInTheDocument();
+
+    // Close the sheet
+    rerender(
+      <Sheet open={false} onOpenChange={onOpenChange}>
+        <SheetTrigger asChild>
+          <button>Open Sheet</button>
+        </SheetTrigger>
+        <SheetContent>
+          <div>Sheet Content</div>
+        </SheetContent>
+      </Sheet>
+    );
+
+    // Complete the animation timer
+    act(() => {
+      vi.advanceTimersByTime(350);
+    });
+
+    // After animation completes, content should be gone
+    expect(screen.queryByText('Sheet Content')).not.toBeInTheDocument();
+  });
+
+  it('should cleanup timer on unmount during animation', async () => {
+    const onOpenChange = vi.fn();
+    const { rerender, unmount } = render(
+      <Sheet open={true} onOpenChange={onOpenChange}>
+        <SheetTrigger asChild>
+          <button>Open Sheet</button>
+        </SheetTrigger>
+        <SheetContent>
+          <div>Sheet Content</div>
+        </SheetContent>
+      </Sheet>
+    );
+
+    // Close the sheet to start animation
+    rerender(
+      <Sheet open={false} onOpenChange={onOpenChange}>
+        <SheetTrigger asChild>
+          <button>Open Sheet</button>
+        </SheetTrigger>
+        <SheetContent>
+          <div>Sheet Content</div>
+        </SheetContent>
+      </Sheet>
+    );
+
+    // Unmount during animation - this should cleanup the timer
+    unmount();
+
+    // Advance timers - should not cause any errors
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
   });
 });
