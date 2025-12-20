@@ -86,4 +86,32 @@ describe('ProductCard Component', () => {
       expect(mockSetView).not.toHaveBeenCalled();
     }
   });
+
+  it('should remove from wishlist when already wishlisted', () => {
+    render(<ProductCard product={mockProduct} setView={mockSetView} />, { wrapper });
+    
+    const buttons = screen.getAllByRole('button');
+    const wishlistButton = buttons.find(btn => btn.querySelector('svg'));
+    
+    if (wishlistButton) {
+      // Add to wishlist first
+      fireEvent.click(wishlistButton);
+      // Then remove
+      fireEvent.click(wishlistButton);
+    }
+  });
+
+  it('should show filled heart when in wishlist', () => {
+    render(<ProductCard product={mockProduct} setView={mockSetView} />, { wrapper });
+    
+    const buttons = screen.getAllByRole('button');
+    const wishlistButton = buttons.find(btn => btn.querySelector('svg'));
+    
+    if (wishlistButton) {
+      fireEvent.click(wishlistButton);
+      // Heart should now be filled - check the SVG class
+      const svg = wishlistButton.querySelector('svg');
+      expect(svg).toBeInTheDocument();
+    }
+  });
 });

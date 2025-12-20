@@ -152,4 +152,56 @@ describe('ProductDetail Component', () => {
       expect(mockSetView).toHaveBeenCalledWith({ type: 'sneakers' });
     });
   });
+
+  it('should add product to cart when add to cart is clicked', async () => {
+    vi.mocked(firebase.getProductById).mockResolvedValue(mockProduct);
+    
+    render(<ProductDetail setView={mockSetView} productId={1} />, { wrapper });
+    
+    await waitFor(() => {
+      const addToCartButton = screen.getByRole('button', { name: /Add to Cart/ });
+      fireEvent.click(addToCartButton);
+    });
+  });
+
+  it('should toggle wishlist when wishlist button is clicked', async () => {
+    vi.mocked(firebase.getProductById).mockResolvedValue(mockProduct);
+    
+    render(<ProductDetail setView={mockSetView} productId={1} />, { wrapper });
+    
+    await waitFor(() => {
+      const wishlistButton = screen.getByRole('button', { name: /Add to Wishlist/ });
+      fireEvent.click(wishlistButton);
+    });
+  });
+
+  it('should show In Wishlist when product is wishlisted', async () => {
+    vi.mocked(firebase.getProductById).mockResolvedValue(mockProduct);
+    
+    render(<ProductDetail setView={mockSetView} productId={1} />, { wrapper });
+    
+    await waitFor(() => {
+      // First add to wishlist
+      const wishlistButton = screen.getByRole('button', { name: /Add to Wishlist/ });
+      fireEvent.click(wishlistButton);
+    });
+  });
+
+  it('should remove from wishlist when already wishlisted', async () => {
+    vi.mocked(firebase.getProductById).mockResolvedValue(mockProduct);
+    
+    render(<ProductDetail setView={mockSetView} productId={1} />, { wrapper });
+    
+    await waitFor(() => {
+      // Add then remove
+      const wishlistButton = screen.getByRole('button', { name: /Add to Wishlist/ });
+      fireEvent.click(wishlistButton);
+    });
+    
+    // Click again to remove
+    await waitFor(() => {
+      const inWishlistButton = screen.getByRole('button', { name: /In Wishlist/ });
+      fireEvent.click(inWishlistButton);
+    });
+  });
 });

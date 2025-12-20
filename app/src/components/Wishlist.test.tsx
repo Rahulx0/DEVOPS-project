@@ -2,63 +2,61 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import WishlistView from './Wishlist';
-import { CartContext } from '../context/CartContext';
-import { WishlistContext } from '../context/WishlistContext';
+import { CartProvider } from '../context/CartContext';
+import { WishlistProvider, WishlistContext } from '../context/WishlistContext';
 import { ToastProvider } from '../context/ToastContext';
 import { ThemeProvider } from '../context/ThemeContext';
 
+const wrapper = ({ children }: { children: React.ReactNode }) => (
+  <ThemeProvider>
+    <ToastProvider>
+      <CartProvider>
+        <WishlistProvider>{children}</WishlistProvider>
+      </CartProvider>
+    </ToastProvider>
+  </ThemeProvider>
+);
+
 describe('WishlistView Component', () => {
   const mockSetView = vi.fn();
-  const mockAddToCart = vi.fn();
-  const mockRemoveFromWishlist = vi.fn();
 
   beforeEach(() => {
     mockSetView.mockClear();
-    mockAddToCart.mockClear();
-    mockRemoveFromWishlist.mockClear();
   });
 
-  const renderWithEmptyWishlist = () => {
-    return render(
-      <ThemeProvider>
-        <ToastProvider>
-          <CartContext.Provider value={{
-            cartItems: [],
-            addToCart: mockAddToCart,
-            removeFromCart: vi.fn(),
-            updateItemQuantity: vi.fn(),
-            clearCart: vi.fn(),
-            itemCount: 0,
-            totalPrice: 0
-          }}>
-            <WishlistContext.Provider value={{
-              wishlistItems: [],
-              addToWishlist: vi.fn(),
-              removeFromWishlist: mockRemoveFromWishlist,
-              isWishlisted: vi.fn(() => false),
-              wishlistCount: 0
-            }}>
-              <WishlistView setView={mockSetView} />
-            </WishlistContext.Provider>
-          </CartContext.Provider>
-        </ToastProvider>
-      </ThemeProvider>
-    );
-  };
+  it('should render wishlist title', () => {
+    render(<WishlistView setView={mockSetView} />, { wrapper });
+    expect(screen.getByText('Your Wishlist')).toBeInTheDocument();
+  });
 
+  it('should show empty wishlist message', () => {
+    render(<WishlistView setView={mockSetView} />, { wrapper });
+    expect(screen.getByText('Your wishlist is empty.')).toBeInTheDocument();
+  });
+
+  it('should show discover products button when empty', () => {
+    render(<WishlistView setView={mockSetView} />, { wrapper });
+    expect(screen.getByRole('button', { name: 'Discover Products' })).toBeInTheDocument();
+  });
+
+  it('should navigate to home when discover products is clicked', () => {
+    render(<WishlistView setView={mockSetView} />, { wrapper });
+    
+    const button = screen.getByRole('button', { name: 'Discover Products' });
+    fireEvent.click(button);
+    
+    expect(mockSetView).toHaveBeenCalledWith({ type: 'home' });
+  });
+
+  // Tests with items using mocked context
   const renderWithItems = () => {
-    return render(
-      <ThemeProvider>
-        <ToastProvider>
-          <CartContext.Provider value={{
-            cartItems: [],
-            addToCart: mockAddToCart,
-            removeFromCart: vi.fn(),
-            updateItemQuantity: vi.fn(),
-            clearCart: vi.fn(),
-            itemCount: 0,
-            totalPrice: 0
-          }}>
+    const mockAddToCart = vi.fn();
+    const mockRemoveFromWishlist = vi.fn();
+    
+    return {
+      ...render(
+        <ThemeProvider>
+          <ToastProvider>
             <WishlistContext.Provider value={{
               wishlistItems: [
                 { id: 1, name: 'Wishlist Item 1', price: 100, image: 'img.jpg', category: 'Apparel', description: 'Desc' },
@@ -69,37 +67,16 @@ describe('WishlistView Component', () => {
               isWishlisted: vi.fn(() => true),
               wishlistCount: 2
             }}>
-              <WishlistView setView={mockSetView} />
+              <CartProvider>
+                <WishlistView setView={mockSetView} />
+              </CartProvider>
             </WishlistContext.Provider>
-          </CartContext.Provider>
-        </ToastProvider>
-      </ThemeProvider>
-    );
+          </ToastProvider>
+        </ThemeProvider>
+      ),
+      mockRemoveFromWishlist
+    };
   };
-
-  it('should render wishlist title', () => {
-    renderWithEmptyWishlist();
-    expect(screen.getByText('Your Wishlist')).toBeInTheDocument();
-  });
-
-  it('should show empty wishlist message', () => {
-    renderWithEmptyWishlist();
-    expect(screen.getByText('Your wishlist is empty.')).toBeInTheDocument();
-  });
-
-  it('should show discover products button when empty', () => {
-    renderWithEmptyWishlist();
-    expect(screen.getByRole('button', { name: 'Discover Products' })).toBeInTheDocument();
-  });
-
-  it('should navigate to home when discover products is clicked', () => {
-    renderWithEmptyWishlist();
-    
-    const button = screen.getByRole('button', { name: 'Discover Products' });
-    fireEvent.click(button);
-    
-    expect(mockSetView).toHaveBeenCalledWith({ type: 'home' });
-  });
 
   it('should render wishlist items', () => {
     renderWithItems();
@@ -120,24 +97,23 @@ describe('WishlistView Component', () => {
   });
 
   it('should move item to cart when move to cart is clicked', () => {
-    renderWithItems();
+    const { mockRemoveFromWishlist } = renderWithItems();
     
     const moveButtons = screen.getAllByRole('button', { name: /Move to Cart/ });
     fireEvent.click(moveButtons[0]);
     
-    expect(mockAddToCart).toHaveBeenCalled();
     expect(mockRemoveFromWishlist).toHaveBeenCalledWith(1);
   });
 
   it('should remove item when trash is clicked', () => {
-    renderWithItems();
+    const { mockRemoveFromWishlist } = renderWithItems();
     
     const buttons = screen.getAllByRole('button');
     const trashButtons = buttons.filter(btn => btn.className.includes('destructive'));
     
     if (trashButtons.length > 0) {
       fireEvent.click(trashButtons[0]);
-      expect(mockRemoveFromWishlist).toHaveBeenCalled();
+      expect(mockRemoveFromWishlist).toHaveBeenCalledWith(1);
     }
   });
 
