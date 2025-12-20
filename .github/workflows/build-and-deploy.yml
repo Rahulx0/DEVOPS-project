@@ -236,17 +236,23 @@ jobs:
         run: |
           npm run test:coverage || echo "No test coverage available"
           
-      - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v6
+      - name: Install SonarQube Scanner
+        run: |
+          npm install -g sonarqube-scanner
+          
+      - name: Run SonarQube Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        with:
-          args: >
-            -Dsonar.projectBaseDir=.
-            -Dsonar.sources=app/src
-            -Dsonar.exclusions=**/node_modules/**,**/build/**,**/dist/**,**/*.min.js,**/coverage/**
-            -Dsonar.typescript.lcov.reportPaths=app/coverage/lcov.info
+        run: |
+          npx sonar-scanner \
+            -Dsonar.projectKey=DEVOPS-project_project_AY1069b-77d0-4338-9bce-d94b987b8a6d \
+            -Dsonar.organization=rahulx0 \
+            -Dsonar.sources=app/src \
+            -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
+            -Dsonar.exclusions=**/node_modules/**,**/build/**,**/dist/**,**/*.min.js,**/coverage/** \
+            -Dsonar.typescript.lcov.reportPaths=app/coverage/lcov.info \
             -Dsonar.javascript.lcov.reportPaths=app/coverage/lcov.info
 
 # CI: pipeline test 2025-11-20
