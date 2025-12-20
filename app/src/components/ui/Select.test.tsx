@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './Select';
@@ -157,5 +157,83 @@ describe('Select Component', () => {
     fireEvent.mouseDown(screen.getByTestId('outside'));
 
     expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+  });
+
+  it('should not select on non-Enter key', () => {
+    render(
+      <Select value="" onValueChange={mockOnValueChange}>
+        <SelectTrigger>
+          <SelectValue placeholder="Select an option" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="option1">Option 1</SelectItem>
+        </SelectContent>
+      </Select>
+    );
+
+    const trigger = screen.getByRole('combobox');
+    fireEvent.click(trigger);
+
+    const option = screen.getByRole('option', { name: 'Option 1' });
+    fireEvent.keyDown(option, { key: 'Tab' });
+
+    expect(mockOnValueChange).not.toHaveBeenCalled();
+  });
+
+  it('should toggle dropdown on multiple clicks', () => {
+    render(
+      <Select value="" onValueChange={mockOnValueChange}>
+        <SelectTrigger>
+          <SelectValue placeholder="Select an option" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="option1">Option 1</SelectItem>
+        </SelectContent>
+      </Select>
+    );
+
+    const trigger = screen.getByRole('combobox');
+    
+    fireEvent.click(trigger);
+    expect(screen.getByRole('listbox')).toBeInTheDocument();
+    
+    fireEvent.click(trigger);
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+  });
+
+  it('should show check icon for selected item', () => {
+    render(
+      <Select value="option1" onValueChange={mockOnValueChange}>
+        <SelectTrigger>
+          <SelectValue placeholder="Select an option" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="option1">Option 1</SelectItem>
+          <SelectItem value="option2">Option 2</SelectItem>
+        </SelectContent>
+      </Select>
+    );
+
+    const trigger = screen.getByRole('combobox');
+    fireEvent.click(trigger);
+
+    const selectedOption = screen.getByRole('option', { name: 'Option 1' });
+    expect(selectedOption.querySelector('span')).toBeInTheDocument();
+  });
+
+  it('should apply custom className to trigger', () => {
+    render(
+      <Select value="" onValueChange={mockOnValueChange}>
+        <SelectTrigger className="custom-class">
+          <SelectValue placeholder="Select" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="option1">Option 1</SelectItem>
+        </SelectContent>
+      </Select>
+    );
+
+    const trigger = screen.getByRole('combobox');
+    expect(trigger.className).toContain('custom-class');
   });
 });
