@@ -258,6 +258,9 @@ describe('Select Component', () => {
     const option = screen.getByText('Option 1');
     fireEvent.click(option);
 
+    // Verify onValueChange was called
+    expect(mockOnValueChange).toHaveBeenCalledWith('option1');
+
     // Rerender with selected value
     rerender(
       <Select value="option1" onValueChange={mockOnValueChange}>
@@ -271,8 +274,8 @@ describe('Select Component', () => {
       </Select>
     );
 
-    // Open again to trigger useEffect
-    fireEvent.click(screen.getByRole('combobox'));
+    // Verify the value is displayed
+    expect(screen.getByText('option1')).toBeInTheDocument();
   });
 
   it('should show placeholder when value is cleared', () => {
