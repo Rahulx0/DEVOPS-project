@@ -28,7 +28,8 @@ Object.defineProperty(window, 'matchMedia', {
 // Mock scrollIntoView
 Element.prototype.scrollIntoView = vi.fn();
 
-// Mock Razorpay
-(globalThis as Record<string, unknown>).Razorpay = vi.fn().mockImplementation(() => ({
-  open: vi.fn(),
-}));
+// Mock Razorpay as a class
+class MockRazorpay {
+  open = vi.fn();
+}
+(globalThis as Record<string, unknown>).Razorpay = MockRazorpay;

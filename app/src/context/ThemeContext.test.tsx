@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import React from 'react';
-import { ThemeProvider, useTheme } from './ThemeContext';
+import { ThemeProvider, useTheme, ThemeContext } from './ThemeContext';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <ThemeProvider>{children}</ThemeProvider>
@@ -61,5 +61,11 @@ describe('ThemeContext', () => {
     const { result } = renderHook(() => useTheme(), { wrapper });
 
     expect(result.current.theme).toBe('dark');
+  });
+
+  it('should throw error when useTheme is used outside ThemeProvider', () => {
+    expect(() => {
+      renderHook(() => useTheme());
+    }).toThrow('useTheme must be used within a ThemeProvider');
   });
 });

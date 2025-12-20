@@ -2,20 +2,46 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import CheckoutView from './Team';
-import { CartProvider } from '../context/CartContext';
+import { CartProvider, CartContext } from '../context/CartContext';
 import { ToastProvider } from '../context/ToastContext';
 
-// Mock Razorpay
+// Mock Razorpay as a constructor function
 const mockRazorpayOpen = vi.fn();
-const mockRazorpay = vi.fn().mockImplementation(() => ({
-  open: mockRazorpayOpen,
-}));
+let lastRazorpayOptions: Record<string, unknown> | null = null;
 
-vi.stubGlobal('Razorpay', mockRazorpay);
+class MockRazorpay {
+  options: Record<string, unknown>;
+  constructor(options: Record<string, unknown>) {
+    this.options = options;
+    lastRazorpayOptions = options;
+  }
+  open() {
+    mockRazorpayOpen();
+  }
+}
+
+vi.stubGlobal('Razorpay', MockRazorpay);
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <ToastProvider>
     <CartProvider>{children}</CartProvider>
+  </ToastProvider>
+);
+
+// Wrapper with items in cart
+const WrapperWithCartItems: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <ToastProvider>
+    <CartContext.Provider value={{
+      cartItems: [{ id: 1, name: 'Test Product', price: 100, image: '', category: 'Apparel', description: '', quantity: 2 }],
+      addToCart: vi.fn(),
+      removeFromCart: vi.fn(),
+      updateItemQuantity: vi.fn(),
+      clearCart: vi.fn(),
+      itemCount: 2,
+      totalPrice: 200
+    }}>
+      {children}
+    </CartContext.Provider>
   </ToastProvider>
 );
 
@@ -24,8 +50,8 @@ describe('CheckoutView Component', () => {
 
   beforeEach(() => {
     mockSetView.mockClear();
-    mockRazorpay.mockClear();
     mockRazorpayOpen.mockClear();
+    lastRazorpayOptions = null;
   });
 
   it('should render checkout page', () => {
@@ -114,5 +140,103 @@ describe('CheckoutView Component', () => {
     fireEvent.change(pincodeInput, { target: { value: '400001' } });
 
     expect(pincodeInput).toHaveValue('400001');
+  });
+
+  it('should enable pay button when cart has items', () => {
+    render(<CheckoutView setView={mockSetView} />, { wrapper: WrapperWithCartItems });
+
+    const payButton = screen.getByRole('button', { name: /Pay/i });
+    expect(payButton).not.toBeDisabled();
+  });
+
+  it('should show correct total price', () => {
+    render(<CheckoutView setView={mockSetView} />, { wrapper: WrapperWithCartItems });
+
+    expect(screen.getByText(/Pay ₹200/)).toBeInTheDocument();
+  });
+
+  it('should open Razorpay when form is submitted with items in cart', () => {
+    render(<CheckoutView setView={mockSetView} />, { wrapper: WrapperWithCartItems });
+
+    const addressInput = screen.getByPlaceholderText('Address');
+    const cityInput = screen.getByPlaceholderText('City');
+    const pincodeInput = screen.getByPlaceholderText('Pincode');
+
+    fireEvent.change(addressInput, { target: { value: '123 Test St' } });
+    fireEvent.change(cityInput, { target: { value: 'Mumbai' } });
+    fireEvent.change(pincodeInput, { target: { value: '400001' } });
+
+    const form = screen.getByRole('button', { name: /Pay/i }).closest('form');
+    if (form) {
+      fireEvent.submit(form);
+    }
+
+    expect(mockRazorpayOpen).toHaveBeenCalled();
+  });
+
+  it('should call Razorpay with correct options', () => {
+    render(<CheckoutView setView={mockSetView} />, { wrapper: WrapperWithCartItems });
+
+    const addressInput = screen.getByPlaceholderText('Address');
+    const cityInput = screen.getByPlaceholderText('City');
+    const pincodeInput = screen.getByPlaceholderText('Pincode');
+
+    fireEvent.change(addressInput, { target: { value: '123 Test St' } });
+    fireEvent.change(cityInput, { target: { value: 'Mumbai' } });
+    fireEvent.change(pincodeInput, { target: { value: '400001' } });
+
+    const form = screen.getByRole('button', { name: /Pay/i }).closest('form');
+    if (form) {
+      fireEvent.submit(form);
+    }
+
+    expect(lastRazorpayOptions).toMatchObject({
+      key: 'rzp_test_1DPvlsxVqlfD9I',
+      amount: 20000, // 200 * 100
+      currency: 'INR',
+      name: 'UrbanGear',
+    });
+  });
+
+  it('should call setView with success after payment handler is called', () => {
+    const mockClearCart = vi.fn();
+    const WrapperWithMockClear: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+      <ToastProvider>
+        <CartContext.Provider value={{
+          cartItems: [{ id: 1, name: 'Test', price: 100, image: '', category: 'Apparel', description: '', quantity: 1 }],
+          addToCart: vi.fn(),
+          removeFromCart: vi.fn(),
+          updateItemQuantity: vi.fn(),
+          clearCart: mockClearCart,
+          itemCount: 1,
+          totalPrice: 100
+        }}>
+          {children}
+        </CartContext.Provider>
+      </ToastProvider>
+    );
+
+    render(<CheckoutView setView={mockSetView} />, { wrapper: WrapperWithMockClear });
+
+    const addressInput = screen.getByPlaceholderText('Address');
+    const cityInput = screen.getByPlaceholderText('City');
+    const pincodeInput = screen.getByPlaceholderText('Pincode');
+
+    fireEvent.change(addressInput, { target: { value: '123 Test St' } });
+    fireEvent.change(cityInput, { target: { value: 'Mumbai' } });
+    fireEvent.change(pincodeInput, { target: { value: '400001' } });
+
+    const form = screen.getByRole('button', { name: /Pay/i }).closest('form');
+    if (form) {
+      fireEvent.submit(form);
+    }
+
+    // Simulate Razorpay success callback
+    if (lastRazorpayOptions?.handler) {
+      (lastRazorpayOptions.handler as (response: { razorpay_payment_id: string }) => void)({ razorpay_payment_id: 'test_payment_123' });
+    }
+
+    expect(mockClearCart).toHaveBeenCalled();
+    expect(mockSetView).toHaveBeenCalledWith({ type: 'success' });
   });
 });

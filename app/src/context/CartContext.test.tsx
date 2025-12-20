@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, render } from '@testing-library/react';
 import React from 'react';
 import { CartProvider, CartContext } from './CartContext';
 import { ToastProvider } from './ToastContext';
@@ -15,6 +15,15 @@ const useCart = () => {
   const context = useContext(CartContext);
   if (!context) throw new Error('useCart must be used within CartProvider');
   return context;
+};
+
+// Component that uses CartProvider without ToastProvider to test error
+const TestCartWithoutToast: React.FC = () => {
+  return (
+    <CartProvider>
+      <div>Test</div>
+    </CartProvider>
+  );
 };
 
 describe('CartContext', () => {
@@ -126,5 +135,16 @@ describe('CartContext', () => {
     expect(result.current.cartItems).toHaveLength(0);
     expect(result.current.itemCount).toBe(0);
     expect(result.current.totalPrice).toBe(0);
+  });
+
+  it('should throw error when CartProvider is used without ToastProvider', () => {
+    // Suppress console.error for this test
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    
+    expect(() => {
+      render(<TestCartWithoutToast />);
+    }).toThrow('useCartToast must be used within a ToastProvider');
+    
+    consoleSpy.mockRestore();
   });
 });

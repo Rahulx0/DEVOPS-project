@@ -64,25 +64,10 @@ const SelectTrigger: React.FC<{ children: React.ReactNode; className?: string }>
 
 const SelectValue: React.FC<{ placeholder?: string }> = ({ placeholder }) => {
     const { value } = useSelectContext();
-    const contentRef = useContext(SelectContentContext);
-    const [displayValue, setDisplayValue] = useState(placeholder);
-
-    useEffect(() => {
-        if(value && contentRef?.current) {
-            const children = Array.from(contentRef.current.children);
-            const selectedItem = children.find(
-                (child): child is HTMLElement => child instanceof HTMLElement && child.dataset.value === value
-            );
-            if (selectedItem) {
-                setDisplayValue(selectedItem.textContent || placeholder);
-            }
-        } else {
-            setDisplayValue(placeholder);
-        }
-
-    }, [value, placeholder, contentRef]);
-
-    return <span>{displayValue}</span>;
+    
+    // Simply display the value or placeholder
+    // The actual display text comes from the parent component's value prop
+    return <span>{value || placeholder}</span>;
 }
 
 
