@@ -208,7 +208,7 @@ jobs:
         continue-on-error: true
 
   sonarqube-analysis:
-    name: Build and analyze
+    name: SonarCloud Code Quality Analysis
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -236,24 +236,11 @@ jobs:
         run: |
           npm run test:coverage || echo "No test coverage available"
           
-      - name: Install SonarQube Scanner
-        run: |
-          npm install -g sonarqube-scanner
-          
-      - name: Run SonarQube Analysis
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        run: |
-          npx sonar-scanner \
-            -Dsonar.projectKey=DEVOPS-project_project_AY1069b-77d0-4338-9bce-d94b987b8a6d \
-            -Dsonar.organization=rahulx0 \
-            -Dsonar.sources=app/src \
-            -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
-            -Dsonar.exclusions=**/node_modules/**,**/build/**,**/dist/**,**/*.min.js,**/coverage/** \
-            -Dsonar.typescript.lcov.reportPaths=app/coverage/lcov.info \
-            -Dsonar.javascript.lcov.reportPaths=app/coverage/lcov.info
 
 # CI: pipeline test 2025-11-20
 # Deploy Thu Dec  4 09:24:03 PM IST 2025
