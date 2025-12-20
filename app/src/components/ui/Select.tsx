@@ -69,9 +69,9 @@ const SelectValue: React.FC<{ placeholder?: string }> = ({ placeholder }) => {
 
     useEffect(() => {
         if(value && contentRef?.current) {
-            const children = Array.from(contentRef.current.children) as HTMLElement[];
+            const children = Array.from(contentRef.current.children);
             const selectedItem = children.find(
-                (child) => child.dataset.value === value
+                (child): child is HTMLElement => child instanceof HTMLElement && child.dataset.value === value
             );
             if (selectedItem) {
                 setDisplayValue(selectedItem.textContent || placeholder);

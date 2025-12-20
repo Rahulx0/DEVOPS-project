@@ -67,7 +67,7 @@ const CheckoutView: React.FC<CheckoutViewProps> = ({ setView }) => {
       },
     };
     
-    const RazorpayConstructor = (window as unknown as { Razorpay: new (options: RazorpayOptions) => { open: () => void } }).Razorpay;
+    const RazorpayConstructor = (globalThis as unknown as { Razorpay: new (options: RazorpayOptions) => { open: () => void } }).Razorpay;
     const rzp = new RazorpayConstructor(options);
     rzp.open();
   };
