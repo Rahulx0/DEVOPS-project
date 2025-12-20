@@ -220,18 +220,34 @@ jobs:
         with:
           fetch-depth: 0  # Shallow clones should be disabled for better analysis
           
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: app/package-lock.json
+          
+      - name: Install dependencies
+        working-directory: ./app
+        run: npm ci
+        
+      - name: Run tests with coverage
+        working-directory: ./app
+        run: |
+          npm run test:coverage || echo "No test coverage available"
+          
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-          
-      # Optional: Fail job when Quality Gate is red
-      # - name: SonarQube Quality Gate check
-      #   uses: SonarSource/sonarqube-quality-gate-action@v1
-      #   timeout-minutes: 5
-      #   env:
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectBaseDir=.
+            -Dsonar.sources=app/src
+            -Dsonar.exclusions=**/node_modules/**,**/build/**,**/dist/**,**/*.min.js,**/coverage/**
+            -Dsonar.typescript.lcov.reportPaths=app/coverage/lcov.info
+            -Dsonar.javascript.lcov.reportPaths=app/coverage/lcov.info
 
 # CI: pipeline test 2025-11-20
 # Deploy Thu Dec  4 09:24:03 PM IST 2025
