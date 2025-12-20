@@ -98,7 +98,7 @@ const Chatbot: React.FC = () => {
 
       const data = await response.json();
       
-      if (data.choices && data.choices[0]?.message?.content) {
+      if (data.choices?.[0]?.message?.content) {
         const assistantMessage: Message = {
           id: Date.now() + 1,
           role: 'assistant',

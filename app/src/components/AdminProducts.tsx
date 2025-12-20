@@ -201,13 +201,12 @@ const AdminProducts: React.FC = () => {
               </div>
             )}
           </div>
-          {loading ? (
-            <p>Loading...</p>
-          ) : error ? (
-            <p className="text-red-500">{error}</p>
-          ) : products.length === 0 ? (
+          {loading && <p>Loading...</p>}
+          {!loading && error && <p className="text-red-500">{error}</p>}
+          {!loading && !error && products.length === 0 && (
             <p className="text-gray-500 dark:text-gray-400">No products yet. Add your first product above!</p>
-          ) : (
+          )}
+          {!loading && !error && products.length > 0 && (
             <div className="space-y-3">
               {products.map(product => (
                 <div 

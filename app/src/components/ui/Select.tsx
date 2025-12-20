@@ -1,13 +1,12 @@
-import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
+import React, { createContext, useContext, useState, useRef, useEffect, useMemo } from 'react';
 import { cn } from '../../lib/utils';
-import { CheckIcon } from '../../constants'; // Assuming check icon is in constants
+import { CheckIcon } from '../../constants';
 
 interface SelectContextProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   value?: string;
   onValueChange: (value: string) => void;
-  setTriggerLabel: (label: string) => void;
 }
 
 const SelectContext = createContext<SelectContextProps | undefined>(undefined);
@@ -24,10 +23,16 @@ const Select: React.FC<{
   children: React.ReactNode;
 }> = ({ value, onValueChange, children }) => {
   const [open, setOpen] = useState(false);
-  const [triggerLabel, setTriggerLabel] = useState('');
+
+  const contextValue = useMemo(() => ({
+    open,
+    setOpen,
+    value,
+    onValueChange
+  }), [open, value, onValueChange]);
 
   return (
-    <SelectContext.Provider value={{ open, setOpen, value, onValueChange, setTriggerLabel }}>
+    <SelectContext.Provider value={contextValue}>
       <div className="relative">{children}</div>
     </SelectContext.Provider>
   );
@@ -64,8 +69,9 @@ const SelectValue: React.FC<{ placeholder?: string }> = ({ placeholder }) => {
 
     useEffect(() => {
         if(value && contentRef?.current) {
-            const selectedItem = Array.from(contentRef.current.children).find(
-                (child) => (child as HTMLElement).dataset.value === value
+            const children = Array.from(contentRef.current.children) as HTMLElement[];
+            const selectedItem = children.find(
+                (child) => child.dataset.value === value
             );
             if (selectedItem) {
                 setDisplayValue(selectedItem.textContent || placeholder);
