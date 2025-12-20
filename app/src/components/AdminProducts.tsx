@@ -75,7 +75,6 @@ const AdminProducts: React.FC = () => {
   };
 
   const handleBulkImport = async () => {
-    console.log('Bulk import clicked, products:', sampleProducts.length);
     if (!confirm(`Import ${sampleProducts.length} products from seedProducts.ts?`)) return;
     
     setSubmitting(true);
@@ -84,7 +83,6 @@ const AdminProducts: React.FC = () => {
     try {
       let count = 0;
       for (const product of sampleProducts) {
-        console.log('Adding product:', product.name);
         await addProduct(product);
         count++;
         setMessage(`Importing... ${count}/${sampleProducts.length}`);
@@ -92,7 +90,6 @@ const AdminProducts: React.FC = () => {
       setMessage(`✅ Imported ${sampleProducts.length} products!`);
       setTimeout(() => window.location.reload(), 1500);
     } catch (err) {
-      console.error('Import error:', err);
       setMessage(`❌ Error: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setSubmitting(false);
@@ -172,7 +169,7 @@ const AdminProducts: React.FC = () => {
           </p>
           <button
             type="button"
-            onClick={() => { alert('Button clicked!'); handleBulkImport(); }}
+            onClick={handleBulkImport}
             disabled={submitting}
             className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 disabled:opacity-50"
           >

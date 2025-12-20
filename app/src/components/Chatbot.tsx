@@ -67,13 +67,11 @@ const Chatbot: React.FC = () => {
 
     try {
       const apiKey = import.meta.env.VITE_NVIDIA_API_KEY;
-      console.log('API Key available:', !!apiKey, apiKey?.substring(0, 10) + '...');
       
       if (!apiKey) {
         throw new Error('NVIDIA API key not configured');
       }
 
-      // Use nginx proxy in production, direct in dev
       const apiUrl = '/api/nvidia/v1/chat/completions';
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -94,16 +92,11 @@ const Chatbot: React.FC = () => {
         })
       });
 
-      console.log('Response status:', response.status);
-
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('API Error:', response.status, errorText);
         throw new Error(`API Error: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log('Response data:', data);
       
       if (data.choices && data.choices[0]?.message?.content) {
         const assistantMessage: Message = {
@@ -113,11 +106,9 @@ const Chatbot: React.FC = () => {
         };
         setMessages(prev => [...prev, assistantMessage]);
       } else {
-        console.error('Invalid response:', data);
         throw new Error('Invalid response');
       }
-    } catch (error) {
-      console.error('Chat error:', error);
+    } catch {
       setMessages(prev => [...prev, {
         id: Date.now() + 1,
         role: 'assistant',
@@ -128,7 +119,7 @@ const Chatbot: React.FC = () => {
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
@@ -199,7 +190,7 @@ const Chatbot: React.FC = () => {
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                onKeyPress={handleKeyPress}
+                onKeyDown={handleKeyDown}
                 placeholder="Type a message..."
                 className="flex-1 p-3 rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-secondary"
                 disabled={isLoading}

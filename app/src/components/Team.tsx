@@ -24,14 +24,33 @@ const CheckoutView: React.FC<CheckoutViewProps> = ({ setView }) => {
     const name = formData.get('fullName') as string;
     const email = formData.get('email') as string;
 
-    const options = {
-      key: 'rzp_test_1DPvlsxVqlfD9I', // Use a public test key
-      amount: totalPrice * 100, // Amount in the smallest currency unit (paise for INR)
+    interface RazorpayResponse {
+      razorpay_payment_id: string;
+      razorpay_order_id?: string;
+      razorpay_signature?: string;
+    }
+
+    interface RazorpayOptions {
+      key: string;
+      amount: number;
+      currency: string;
+      name: string;
+      description: string;
+      image: string;
+      handler: (response: RazorpayResponse) => void;
+      prefill: { name: string; email: string; contact: string };
+      notes: { address: string };
+      theme: { color: string };
+    }
+
+    const options: RazorpayOptions = {
+      key: 'rzp_test_1DPvlsxVqlfD9I',
+      amount: totalPrice * 100,
       currency: "INR",
       name: "UrbanGear",
       description: "Test Transaction",
       image: "/favicon.svg",
-      handler: function (response: any) {
+      handler: function (_response: RazorpayResponse) {
         clearCart();
         setView({ type: 'success' });
       },
@@ -48,7 +67,8 @@ const CheckoutView: React.FC<CheckoutViewProps> = ({ setView }) => {
       },
     };
     
-    const rzp = new (window as any).Razorpay(options);
+    const RazorpayConstructor = (window as unknown as { Razorpay: new (options: RazorpayOptions) => { open: () => void } }).Razorpay;
+    const rzp = new RazorpayConstructor(options);
     rzp.open();
   };
 
