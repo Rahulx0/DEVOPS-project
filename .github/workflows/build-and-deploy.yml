@@ -17,9 +17,59 @@ env:
   KUBE_NAMESPACE: default
 
 jobs:
+  setup-infrastructure:
+    name: Setup AWS Infrastructure
+    runs-on: ubuntu-latest
+    if: (github.ref == 'refs/heads/rahul' || github.ref == 'refs/heads/main') && github.event_name == 'push'
+    outputs:
+      cluster-exists: ${{ steps.check-cluster.outputs.exists }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Check if EKS cluster exists
+        id: check-cluster
+        run: |
+          if aws eks describe-cluster --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }} 2>/dev/null; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "✅ EKS cluster already exists"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "⚠️  EKS cluster does not exist, will create it"
+          fi
+
+      - name: Setup Terraform
+        if: steps.check-cluster.outputs.exists == 'false'
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.0
+
+      - name: Terraform Init
+        if: steps.check-cluster.outputs.exists == 'false'
+        working-directory: ./infra/terraform/envs/dev
+        run: terraform init
+
+      - name: Terraform Apply
+        if: steps.check-cluster.outputs.exists == 'false'
+        working-directory: ./infra/terraform/envs/dev
+        run: |
+          terraform apply -auto-approve
+          echo "✅ Infrastructure created"
+          echo "Waiting 60 seconds for cluster to stabilize..."
+          sleep 60
+
   build:
     name: Build and Push Image
     runs-on: ubuntu-latest
+    needs: setup-infrastructure
     outputs:
       image-tag: ${{ steps.image.outputs.tag }}
       image-uri: ${{ steps.image.outputs.uri }}
