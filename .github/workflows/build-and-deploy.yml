@@ -61,6 +61,12 @@ jobs:
         if: steps.check-cluster.outputs.exists == 'false'
         working-directory: ./infra/terraform/envs/dev
         run: |
+          # Import ECR repository if it exists
+          if aws ecr describe-repositories --repository-names urbangear-dev-frontend --region ${{ env.AWS_REGION }} 2>/dev/null; then
+            echo "ECR repository exists, importing into Terraform state..."
+            terraform import module.ecr.aws_ecr_repository.main urbangear-dev-frontend || true
+          fi
+          
           terraform apply -auto-approve
           echo "✅ Infrastructure created"
           echo "Waiting 60 seconds for cluster to stabilize..."
