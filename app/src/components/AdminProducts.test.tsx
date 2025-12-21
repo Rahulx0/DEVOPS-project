@@ -363,4 +363,63 @@ describe('AdminProducts Component', () => {
       expect(screen.getByText(/Error:/)).toBeInTheDocument();
     });
   });
+
+  it('should handle non-Error objects in bulk import', async () => {
+    vi.spyOn(useProductsModule, 'useProducts').mockReturnValue({
+      products: [],
+      loading: false,
+      error: null
+    });
+    // Mock rejection with a string instead of Error object
+    vi.mocked(firebase.addProduct).mockRejectedValue('String error');
+
+    render(<AdminProducts />);
+    
+    fireEvent.click(screen.getByText(/Import 1 Products/));
+    
+    await waitFor(() => {
+      expect(screen.getByText(/Error: String error/)).toBeInTheDocument();
+    });
+  });
+
+  it('should not delete when no products are selected', () => {
+    vi.spyOn(useProductsModule, 'useProducts').mockReturnValue({
+      products: [
+        { id: 1, name: 'Product 1', price: 100, image: 'img.jpg', category: 'Apparel', description: 'Desc' }
+      ],
+      loading: false,
+      error: null
+    });
+
+    render(<AdminProducts />);
+    
+    // Don't select any products, just click delete
+    fireEvent.click(screen.getByText(/Delete Selected/));
+    
+    // Should not call deleteProduct since no products are selected
+    expect(firebase.deleteProduct).not.toHaveBeenCalled();
+  });
+
+  it('should handle non-Error objects in form submission', async () => {
+    vi.spyOn(useProductsModule, 'useProducts').mockReturnValue({
+      products: [],
+      loading: false,
+      error: null
+    });
+    // Mock rejection with a string instead of Error object
+    vi.mocked(firebase.addProduct).mockRejectedValue('Form submission failed');
+
+    render(<AdminProducts />);
+    
+    fireEvent.change(screen.getByPlaceholderText('Product Name'), { target: { value: 'Test' } });
+    fireEvent.change(screen.getByPlaceholderText('Price'), { target: { value: '100' } });
+    fireEvent.change(screen.getByPlaceholderText('Image URL'), { target: { value: 'img.jpg' } });
+    fireEvent.change(screen.getByPlaceholderText('Description'), { target: { value: 'Desc' } });
+    
+    fireEvent.click(screen.getByRole('button', { name: 'Add Product' }));
+    
+    await waitFor(() => {
+      expect(screen.getByText(/Error: Form submission failed/)).toBeInTheDocument();
+    });
+  });
 });
