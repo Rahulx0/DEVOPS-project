@@ -160,6 +160,7 @@ describe('ProductDetail Component', () => {
     
     await waitFor(() => {
       const addToCartButton = screen.getByRole('button', { name: /Add to Cart/ });
+      expect(addToCartButton).toBeInTheDocument();
       fireEvent.click(addToCartButton);
     });
   });
@@ -171,6 +172,7 @@ describe('ProductDetail Component', () => {
     
     await waitFor(() => {
       const wishlistButton = screen.getByRole('button', { name: /Add to Wishlist/ });
+      expect(wishlistButton).toBeInTheDocument();
       fireEvent.click(wishlistButton);
     });
   });
@@ -183,6 +185,7 @@ describe('ProductDetail Component', () => {
     await waitFor(() => {
       // First add to wishlist
       const wishlistButton = screen.getByRole('button', { name: /Add to Wishlist/ });
+      expect(wishlistButton).toBeInTheDocument();
       fireEvent.click(wishlistButton);
     });
   });
@@ -195,12 +198,14 @@ describe('ProductDetail Component', () => {
     await waitFor(() => {
       // Add then remove
       const wishlistButton = screen.getByRole('button', { name: /Add to Wishlist/ });
+      expect(wishlistButton).toBeInTheDocument();
       fireEvent.click(wishlistButton);
     });
     
     // Click again to remove
     await waitFor(() => {
       const inWishlistButton = screen.getByRole('button', { name: /In Wishlist/ });
+      expect(inWishlistButton).toBeInTheDocument();
       fireEvent.click(inWishlistButton);
     });
   });

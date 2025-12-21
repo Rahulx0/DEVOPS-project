@@ -20,7 +20,7 @@ import { AppView } from './lib/types';
 const App: React.FC = () => {
   const [view, setView] = useState<AppView>(() => {
     // Check URL for admin access: ?admin=true
-    if (window.location.search.includes('admin=true')) {
+    if (globalThis.location.search.includes('admin=true')) {
       return { type: 'admin' };
     }
     return { type: 'home' };

@@ -31,7 +31,7 @@ const AdminProducts: React.FC = () => {
       });
       setMessage(`✅ Product added with ID: ${newId}`);
       setFormData({ name: '', price: '', image: '', category: 'Apparel', description: '' });
-      setTimeout(() => window.location.reload(), 1500);
+      setTimeout(() => globalThis.location.reload(), 1500);
     } catch (err) {
       setMessage(`❌ Error: ${err}`);
     } finally {
@@ -66,7 +66,7 @@ const AdminProducts: React.FC = () => {
       }
       setMessage(`✅ Deleted ${selectedIds.length} products`);
       setSelectedIds([]);
-      setTimeout(() => window.location.reload(), 1000);
+      setTimeout(() => globalThis.location.reload(), 1000);
     } catch (err) {
       setMessage(`❌ Error: ${err}`);
     } finally {
@@ -88,7 +88,7 @@ const AdminProducts: React.FC = () => {
         setMessage(`Importing... ${count}/${sampleProducts.length}`);
       }
       setMessage(`✅ Imported ${sampleProducts.length} products!`);
-      setTimeout(() => window.location.reload(), 1500);
+      setTimeout(() => globalThis.location.reload(), 1500);
     } catch (err) {
       setMessage(`❌ Error: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
