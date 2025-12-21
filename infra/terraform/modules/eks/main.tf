@@ -72,6 +72,18 @@ resource "aws_iam_role_policy_attachment" "eks_registry_policy" {
   role       = aws_iam_role.eks_node_group.name
 }
 
+# EC2 Full Access for ALB Controller (needed for security groups, subnets, etc.)
+resource "aws_iam_role_policy_attachment" "eks_ec2_full_access" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
+  role       = aws_iam_role.eks_node_group.name
+}
+
+# ELB Full Access for ALB Controller (needed for load balancer management)
+resource "aws_iam_role_policy_attachment" "eks_elb_full_access" {
+  policy_arn = "arn:aws:iam::aws:policy/ElasticLoadBalancingFullAccess"
+  role       = aws_iam_role.eks_node_group.name
+}
+
 # EKS Cluster
 resource "aws_eks_cluster" "main" {
   name     = "${var.project_name}-${var.environment}-cluster"
@@ -127,6 +139,8 @@ resource "aws_eks_node_group" "main" {
     aws_iam_role_policy_attachment.eks_node_group_policy,
     aws_iam_role_policy_attachment.eks_cni_policy,
     aws_iam_role_policy_attachment.eks_registry_policy,
+    aws_iam_role_policy_attachment.eks_ec2_full_access,
+    aws_iam_role_policy_attachment.eks_elb_full_access,
   ]
 
   tags = {
