@@ -132,29 +132,53 @@ Build a production-ready platform that addresses these challenges through:
 - Git and GitHub account
 - kubectl and AWS CLI configured
 
-### 1-Click Setup
+### Deploy Complete DevOps Stack
+
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/ecommerce-devops-project.git
-cd ecommerce-devops-project
-
-# Initialize the project
-./scripts/setup.sh
-
-# Deploy to AWS
-make deploy-all
-````
-
-### Local Development
-```bash
-# Start development environment
-docker-compose up -d
-
-# Access applications
-echo "Frontend: http://localhost:3000"
-echo "API: http://localhost:8080"
-echo "MongoDB: localhost:27017"
+# Run the start script
+./scripts/start.sh
 ```
+
+This single command deploys the **complete DevOps stack**:
+
+**Infrastructure:**
+- ✅ AWS Load Balancer Controller (external access)
+- ✅ ArgoCD (GitOps automation)
+- ✅ Prometheus + Grafana (monitoring)
+- ✅ RBAC (role-based access control)
+- ✅ Network Policies (pod-level security)
+
+**CI/CD Pipeline:**
+- ✅ Docker build & push to ECR
+- ✅ 256 unit tests (98.61% coverage)
+- ✅ SonarCloud code quality analysis
+- ✅ Trivy security scanning
+- ✅ Automated deployment to EKS
+
+**Time**: ~8-12 minutes
+
+### Access Your Application
+
+```bash
+# Get application URL
+kubectl get ingress urbangear-frontend-ingress -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
+
+# Access ArgoCD UI
+kubectl port-forward svc/argocd-server -n argocd 8080:443
+# Visit: https://localhost:8080
+# Username: admin
+# Password: kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+
+# Access Grafana Dashboard
+kubectl port-forward -n monitoring svc/prometheus-grafana 3000:80
+# Visit: http://localhost:3000
+# Username: admin
+# Password: prom-operator
+```
+
+### Monitor Progress
+
+https://github.com/Rahulx0/DEVOPS-project/actions
 
 ---
 
