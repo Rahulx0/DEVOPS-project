@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import React from 'react';
 import AdminProducts from './AdminProducts';
 import * as useProductsModule from '../hooks/useProducts';
@@ -17,17 +17,22 @@ vi.mock('../scripts/seedProducts', () => ({
 const mockConfirm = vi.fn(() => true);
 globalThis.confirm = mockConfirm;
 
-// Mock window.location.reload
-const mockReload = vi.fn();
-Object.defineProperty(window, 'location', {
-  value: { reload: mockReload },
-  writable: true
-});
+// Store original location
+const originalLocation = window.location;
 
 describe('AdminProducts Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockConfirm.mockReturnValue(true);
+    
+    // Mock window.location
+    delete (window as any).location;
+    window.location = { ...originalLocation, reload: vi.fn() } as any;
+  });
+
+  afterEach(() => {
+    // Restore original location
+    window.location = originalLocation;
   });
 
   it('should render admin title', () => {

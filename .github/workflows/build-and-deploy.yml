@@ -234,7 +234,20 @@ jobs:
       - name: Run tests with coverage
         working-directory: ./app
         run: |
-          npm run test:coverage || echo "No test coverage available"
+          npm run test:coverage
+          echo "Coverage report generated:"
+          ls -la coverage/
+          head -50 coverage/lcov.info
+          
+      - name: Verify coverage file exists
+        run: |
+          if [ -f "app/coverage/lcov.info" ]; then
+            echo "Coverage file found at app/coverage/lcov.info"
+            wc -l app/coverage/lcov.info
+          else
+            echo "ERROR: Coverage file not found!"
+            exit 1
+          fi
           
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master

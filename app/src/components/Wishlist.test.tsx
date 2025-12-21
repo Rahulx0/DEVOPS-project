@@ -108,8 +108,10 @@ describe('WishlistView Component', () => {
   it('should remove item when trash is clicked', () => {
     const { mockRemoveFromWishlist } = renderWithItems();
     
-    const buttons = screen.getAllByRole('button');
-    const trashButtons = buttons.filter(btn => btn.className.includes('destructive'));
+    // Find buttons that are not "Move to Cart" buttons (the trash buttons)
+    const allButtons = screen.getAllByRole('button');
+    const moveToCartButtons = screen.getAllByRole('button', { name: /Move to Cart/ });
+    const trashButtons = allButtons.filter(btn => !moveToCartButtons.includes(btn));
     
     if (trashButtons.length > 0) {
       fireEvent.click(trashButtons[0]);
@@ -171,9 +173,10 @@ describe('WishlistView Component', () => {
   it('should call handleRemove which removes from wishlist', () => {
     const { mockRemoveFromWishlist } = renderWithFullContext();
     
-    // Find the destructive button (trash icon)
-    const buttons = screen.getAllByRole('button');
-    const trashButton = buttons.find(btn => btn.className.includes('destructive'));
+    // Find buttons that are not "Move to Cart" buttons (the trash button)
+    const allButtons = screen.getAllByRole('button');
+    const moveToCartButton = screen.getByRole('button', { name: /Move to Cart/ });
+    const trashButton = allButtons.find(btn => btn !== moveToCartButton);
     
     expect(trashButton).toBeDefined();
     if (trashButton) {
