@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
-import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import AdminProducts from './AdminProducts';
 import * as useProductsModule from '../hooks/useProducts';
 import * as firebase from '../lib/firebase';
@@ -17,22 +16,23 @@ vi.mock('../scripts/seedProducts', () => ({
 const mockConfirm = vi.fn(() => true);
 globalThis.confirm = mockConfirm;
 
-// Store original location
-const originalLocation = window.location;
-
 describe('AdminProducts Component', () => {
+  const mockReload = vi.fn();
+  
   beforeEach(() => {
     vi.clearAllMocks();
     mockConfirm.mockReturnValue(true);
     
-    // Mock window.location
-    delete (window as any).location;
-    window.location = { ...originalLocation, reload: vi.fn() } as any;
+    // Mock window.location.reload
+    Object.defineProperty(window, 'location', {
+      value: { reload: mockReload },
+      writable: true,
+      configurable: true
+    });
   });
 
   afterEach(() => {
-    // Restore original location
-    window.location = originalLocation;
+    mockReload.mockClear();
   });
 
   it('should render admin title', () => {
@@ -393,8 +393,8 @@ describe('AdminProducts Component', () => {
 
     render(<AdminProducts />);
     
-    // Don't select any products, just click delete
-    fireEvent.click(screen.getByText(/Delete Selected/));
+    // The delete button should not be visible when no products are selected
+    expect(screen.queryByText(/Delete Selected/)).not.toBeInTheDocument();
     
     // Should not call deleteProduct since no products are selected
     expect(firebase.deleteProduct).not.toHaveBeenCalled();
