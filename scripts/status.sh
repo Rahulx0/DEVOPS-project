@@ -81,7 +81,8 @@ echo "----------------------------------------"
 if kubectl get namespace monitoring &>/dev/null; then
     echo "   URL:      http://localhost:3000"
     echo "   Username: admin"
-    echo "   Password: prom-operator"
+    GRAFANA_PASS=$(kubectl get secret -n monitoring prometheus-grafana -o jsonpath="{.data.admin-password}" 2>/dev/null | base64 -d || echo "prom-operator")
+    echo "   Password: $GRAFANA_PASS"
 else
     echo "   Status: Not installed"
 fi
