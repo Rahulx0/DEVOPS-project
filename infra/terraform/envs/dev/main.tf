@@ -59,8 +59,8 @@ module "eks" {
   
   kubernetes_version = "1.28"
   instance_types     = ["t3.small"]  # $0.0208/hour vs t3.medium $0.0416/hour
-  desired_capacity   = 1             # Single node for demo
-  max_capacity       = 2
+  desired_capacity   = 2             # 2 nodes for DevOps tools
+  max_capacity       = 3
   min_capacity       = 1
   capacity_type      = "SPOT"        # 70% cost savings
   disk_size          = 20
