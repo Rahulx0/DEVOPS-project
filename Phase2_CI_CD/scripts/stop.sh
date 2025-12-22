@@ -367,7 +367,7 @@ cleanup_ecr
 
 # Try Terraform destroy first
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-WORKSPACE_ROOT="$( cd "$SCRIPT_DIR/.." && pwd )"
+WORKSPACE_ROOT="$( cd "$SCRIPT_DIR/../.." && pwd )"
 
 # Change to Terraform dev environment directory
 cd "$WORKSPACE_ROOT/infra/terraform/envs/dev"
@@ -446,4 +446,4 @@ fi
 echo ""
 echo "🌐 Website is no longer accessible"
 echo ""
-echo "To restart the website, run: ./scripts/start.sh"
+echo "To restart the website, run: ./Phase2_CI_CD/scripts/start.sh"
