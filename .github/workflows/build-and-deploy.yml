@@ -68,9 +68,44 @@ jobs:
           fi
           
           terraform apply -auto-approve
+          
+          # Export certificate ARN for later use
+          CERT_ARN=$(terraform output -raw certificate_arn 2>/dev/null || echo "")
+          echo "CERTIFICATE_ARN=$CERT_ARN" >> $GITHUB_ENV
+          
+          if [ -n "$CERT_ARN" ]; then
+            echo "✅ SSL Certificate ARN: $CERT_ARN"
+            echo ""
+            echo "⚠️  IMPORTANT: Add DNS validation record to qzz.io:"
+            terraform output -json certificate_validation_records | jq -r '.[0].resource_record | "Name: \(.name)\nType: \(.type)\nValue: \(.value)"'
+          fi
+          
           echo "✅ Infrastructure created"
           echo "Waiting 60 seconds for cluster to stabilize..."
           sleep 60
+
+      - name: Get Certificate ARN (if cluster exists)
+        if: steps.check-cluster.outputs.exists == 'true'
+        run: |
+          # Get certificate ARN from ACM
+          CERT_ARN=$(aws acm list-certificates --region ${{ env.AWS_REGION }} \
+            --query "CertificateSummaryList[?DomainName=='urbangear.qzz.io'].CertificateArn" \
+            --output text 2>/dev/null || echo "")
+          
+          if [ -z "$CERT_ARN" ]; then
+            echo "⚠️  No certificate found, will create one..."
+            CERT_ARN=$(aws acm request-certificate \
+              --domain-name urbangear.qzz.io \
+              --validation-method DNS \
+              --region ${{ env.AWS_REGION }} \
+              --query "CertificateArn" \
+              --output text)
+            echo "📝 Certificate requested: $CERT_ARN"
+          else
+            echo "✅ Certificate found: $CERT_ARN"
+          fi
+          
+          echo "CERTIFICATE_ARN=$CERT_ARN" >> $GITHUB_ENV
 
   build:
     name: Build and Push Image
@@ -332,6 +367,29 @@ jobs:
         with:
           name: deployment-manifest
           path: manifests/overlays/prod
+
+      - name: Get Certificate ARN
+        id: get-cert
+        run: |
+          # Get certificate ARN from ACM
+          CERT_ARN=$(aws acm list-certificates --region ${{ env.AWS_REGION }} \
+            --query "CertificateSummaryList[?DomainName=='urbangear.qzz.io'].CertificateArn" \
+            --output text 2>/dev/null || echo "")
+          
+          if [ -n "$CERT_ARN" ]; then
+            echo "✅ Certificate found: $CERT_ARN"
+            echo "cert_arn=$CERT_ARN" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️  No certificate found, deploying without HTTPS"
+            echo "cert_arn=" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update Ingress with Certificate
+        if: steps.get-cert.outputs.cert_arn != ''
+        run: |
+          echo "Updating ingress with certificate ARN..."
+          sed -i "s|YOUR_CERT_ARN|${{ steps.get-cert.outputs.cert_arn }}|g" manifests/base/deployment.yaml
+          echo "✅ Ingress updated with HTTPS configuration"
 
       - name: Deploy to Kubernetes
         run: |

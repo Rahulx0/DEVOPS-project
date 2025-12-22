@@ -30,3 +30,17 @@ output "aws_load_balancer_controller_role_arn" {
   value       = module.eks.aws_load_balancer_controller_role_arn
 }
 
+output "certificate_arn" {
+  description = "ARN of the ACM certificate for HTTPS"
+  value       = module.acm.certificate_arn
+}
+
+output "certificate_validation_records" {
+  description = "DNS validation records for the certificate"
+  value       = module.acm.domain_validation_options
+}
+
+output "certificate_status" {
+  description = "Status of the ACM certificate"
+  value       = module.acm.certificate_status
+}
