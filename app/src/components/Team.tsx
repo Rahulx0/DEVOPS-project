@@ -87,11 +87,9 @@ const CheckoutView: React.FC<CheckoutViewProps> = ({ setView }) => {
                 <Input name="city" type="text" placeholder="City" required />
                 <Input 
                   name="pincode" 
-                  type="tel" 
-                  placeholder="Pincode" 
+                  type="text" 
+                  placeholder="Pincode (6 digits)" 
                   required 
-                  minLength={6}
-                  maxLength={6}
                 />
               </div>
             </div>
