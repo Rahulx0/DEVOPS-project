@@ -16,7 +16,7 @@ spec:
     # Branch or commit to deploy from
     targetRevision: rahul
     # Path to the manifests directory in the repo
-    path: manifests/overlays/prod
+    path: Phase3_Deployment/overlays/prod
   # Destination cluster and namespace for deployment
   destination:
     # Kubernetes cluster server URL

@@ -58,12 +58,12 @@ jobs:
 
       - name: Terraform Init
         if: steps.check-cluster.outputs.exists == 'false'
-        working-directory: ./infra/terraform/envs/dev
+        working-directory: ./Phase3_Deployment/infra/terraform/envs/dev
         run: terraform init
 
       - name: Terraform Apply
         if: steps.check-cluster.outputs.exists == 'false'
-        working-directory: ./infra/terraform/envs/dev
+        working-directory: ./Phase3_Deployment/infra/terraform/envs/dev
         run: |
           # Import ECR repository if it exists
           if aws ecr describe-repositories --repository-names urbangear-dev-frontend --region ${{ env.AWS_REGION }} 2>/dev/null; then
@@ -137,8 +137,8 @@ jobs:
         id: build-image
         uses: docker/build-push-action@v6
         with:
-          context: ./app
-          file: ./app/Dockerfile
+          context: ./Phase1_Development/app
+          file: ./Phase1_Development/app/Dockerfile
           target: prod
           push: true
           tags: |
@@ -161,13 +161,13 @@ jobs:
 
       - name: Update deployment manifest
         run: |
-          sed -i 's|924612597584.dkr.ecr.us-east-1.amazonaws.com/urbangear-dev-frontend:latest|${{ steps.image.outputs.uri }}|g' manifests/overlays/prod/deployment-patch.yaml
+          sed -i 's|924612597584.dkr.ecr.us-east-1.amazonaws.com/urbangear-dev-frontend:latest|${{ steps.image.outputs.uri }}|g' Phase3_Deployment/overlays/prod/deployment-patch.yaml
 
       - name: Commit updated manifest back to repo
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          git add manifests/overlays/prod/deployment-patch.yaml
+          git add Phase3_Deployment/overlays/prod/deployment-patch.yaml
           git diff --quiet && git diff --staged --quiet || git commit -m "chore: update image to ${{ steps.image.outputs.tag }}"
           git push origin rahul
         continue-on-error: true
@@ -176,7 +176,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: deployment-manifest
-          path: manifests/overlays/prod/deployment-patch.yaml
+          path: Phase3_Deployment/overlays/prod/deployment-patch.yaml
 
   setup-alb-controller:
     name: Setup ALB Controller
@@ -240,7 +240,7 @@ jobs:
           kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
           echo "Waiting for ArgoCD server..."
           kubectl wait --for=condition=available --timeout=300s deployment/argocd-server -n argocd || true
-          kubectl apply -f infra/argocd/application.yaml
+          kubectl apply -f Phase3_Deployment/infra/argocd/application.yaml
           echo "✅ ArgoCD installed"
 
   setup-monitoring:
@@ -300,14 +300,14 @@ jobs:
       - name: Apply RBAC Configuration
         run: |
           echo "Applying RBAC roles..."
-          kubectl apply -f infra/kubernetes/rbac/developer-role.yaml
-          kubectl apply -f infra/kubernetes/rbac/admin-role.yaml
+          kubectl apply -f Phase3_Deployment/infra/kubernetes/rbac/developer-role.yaml
+          kubectl apply -f Phase3_Deployment/infra/kubernetes/rbac/admin-role.yaml
           echo "✅ RBAC configured"
 
       - name: Apply Network Policies
         run: |
           echo "Applying Network Policies..."
-          kubectl apply -f infra/kubernetes/network-policies/default-deny.yaml
+          kubectl apply -f Phase3_Deployment/infra/kubernetes/network-policies/default-deny.yaml
           echo "✅ Network Policies configured"
 
   deploy:
@@ -335,7 +335,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: deployment-manifest
-          path: manifests/overlays/prod
+          path: Phase3_Deployment/overlays/prod
 
       - name: Deploy to Kubernetes
         run: |
@@ -344,7 +344,7 @@ jobs:
           # Delete old pending pods if any
           kubectl delete pods -l app=urbangear-frontend --field-selector=status.phase=Pending --ignore-not-found=true
           
-          kubectl apply -k manifests/overlays/prod/
+          kubectl apply -k Phase3_Deployment/overlays/prod/
           
           echo "Current deployment status:"
           kubectl get deployment urbangear-frontend -n ${{ env.KUBE_NAMESPACE }} -o wide
@@ -440,15 +440,15 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd app && npm ci
+          cd Phase1_Development/app && npm ci
 
       - name: Build application
         run: |
-          cd app && npm run build
+          cd Phase1_Development/app && npm run build
 
       - name: Run linter
         run: |
-          cd app && npm run lint 2>/dev/null || true
+          cd Phase1_Development/app && npm run lint 2>/dev/null || true
 
   security-scan:
     name: Security Scan
@@ -494,14 +494,14 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: app/package-lock.json
+          cache-dependency-path: Phase1_Development/app/package-lock.json
           
       - name: Install dependencies
-        working-directory: ./app
+        working-directory: ./Phase1_Development/app
         run: npm ci
         
       - name: Run tests with coverage
-        working-directory: ./app
+        working-directory: ./Phase1_Development/app
         run: |
           npm run test:coverage
           echo "Coverage report generated:"

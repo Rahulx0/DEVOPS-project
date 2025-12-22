@@ -4,7 +4,7 @@ kind: Kustomization
 
 # Base resources to include
 resources:
-- ../../base
+- ../../../Phase2_CI_CD/base
 
 # Patches to apply to base resources
 patches:
