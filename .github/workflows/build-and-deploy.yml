@@ -510,9 +510,9 @@ jobs:
           
       - name: Verify coverage file exists
         run: |
-          if [ -f "app/coverage/lcov.info" ]; then
-            echo "Coverage file found at app/coverage/lcov.info"
-            wc -l app/coverage/lcov.info
+          if [ -f "Phase1_Development/app/coverage/lcov.info" ]; then
+            echo "Coverage file found at Phase1_Development/app/coverage/lcov.info"
+            wc -l Phase1_Development/app/coverage/lcov.info
           else
             echo "ERROR: Coverage file not found!"
             exit 1
