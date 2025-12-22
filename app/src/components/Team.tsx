@@ -24,6 +24,12 @@ const CheckoutView: React.FC<CheckoutViewProps> = ({ setView }) => {
     const name = formData.get('fullName') as string;
     const email = formData.get('email') as string;
 
+    // Check if Razorpay is loaded
+    if (typeof (window as any).Razorpay === 'undefined') {
+      alert('Payment gateway is loading. Please try again in a moment.');
+      return;
+    }
+
     interface RazorpayResponse {
       razorpay_payment_id: string;
       razorpay_order_id?: string;
@@ -67,8 +73,7 @@ const CheckoutView: React.FC<CheckoutViewProps> = ({ setView }) => {
       },
     };
     
-    const RazorpayConstructor = (globalThis as unknown as { Razorpay: new (options: RazorpayOptions) => { open: () => void } }).Razorpay;
-    const rzp = new RazorpayConstructor(options);
+    const rzp = new (window as any).Razorpay(options);
     rzp.open();
   };
 
