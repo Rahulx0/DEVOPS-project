@@ -1,56 +1,34 @@
 {
-  "name": "urbangear-e-commerce", // Project name
-  "private": true, // Not published to npm
-  "version": "0.0.0", // Project version
-  "type": "module", // Use ES modules
+  "name": "urbangear-e-commerce",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    // Script to start dev server
     "dev": "vite",
-    // Script to build production bundle
     "build": "vite build",
-    // Script to preview production build
     "preview": "vite preview",
-    // Lint code for errors
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    // Lint and auto-fix issues
     "lint:fix": "eslint . --ext ts,tsx --fix",
-    // Run tests
     "test": "vitest",
-    // Run tests with coverage
     "test:coverage": "vitest run --coverage",
-    // Launch Vitest UI
     "test:ui": "vitest --ui"
   },
   "dependencies": {
-    // Firebase for backend services
     "firebase": "^12.6.0",
-    // React core library
     "react": "^19.2.0",
-    // React DOM rendering
     "react-dom": "^19.2.0"
   },
   "devDependencies": {
-    // Jest DOM matchers for testing
     "@testing-library/jest-dom": "^6.9.1",
-    // React testing utilities
     "@testing-library/react": "^16.3.1",
-    // TypeScript types for Node.js
     "@types/node": "^22.14.0",
-    // TypeScript types for React
     "@types/react": "^19.2.7",
-    // TypeScript types for React DOM
     "@types/react-dom": "^19.2.3",
-    // Vite plugin for React
     "@vitejs/plugin-react": "^5.0.0",
-    // Vitest coverage provider
     "@vitest/coverage-v8": "^4.0.16",
-    // JSDOM for simulating browser
     "jsdom": "^27.3.0",
-    // TypeScript compiler
     "typescript": "~5.8.2",
-    // Vite build tool
     "vite": "^6.2.0",
-    // Vitest test runner
     "vitest": "^4.0.16"
   }
 }
