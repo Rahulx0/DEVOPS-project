@@ -68,7 +68,7 @@ describe('CheckoutView Component', () => {
     expect(screen.getByPlaceholderText('Email Address')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Address')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('City')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Pincode')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Pincode (6 digits)')).toBeInTheDocument();
   });
 
   it('should have default values in form', () => {
@@ -136,7 +136,7 @@ describe('CheckoutView Component', () => {
   it('should allow input in pincode field', () => {
     render(<CheckoutView setView={mockSetView} />, { wrapper });
 
-    const pincodeInput = screen.getByPlaceholderText('Pincode');
+    const pincodeInput = screen.getByPlaceholderText('Pincode (6 digits)');
     fireEvent.change(pincodeInput, { target: { value: '400001' } });
 
     expect(pincodeInput).toHaveValue('400001');
@@ -160,7 +160,7 @@ describe('CheckoutView Component', () => {
 
     const addressInput = screen.getByPlaceholderText('Address');
     const cityInput = screen.getByPlaceholderText('City');
-    const pincodeInput = screen.getByPlaceholderText('Pincode');
+    const pincodeInput = screen.getByPlaceholderText('Pincode (6 digits)');
 
     fireEvent.change(addressInput, { target: { value: '123 Test St' } });
     fireEvent.change(cityInput, { target: { value: 'Mumbai' } });
@@ -179,7 +179,7 @@ describe('CheckoutView Component', () => {
 
     const addressInput = screen.getByPlaceholderText('Address');
     const cityInput = screen.getByPlaceholderText('City');
-    const pincodeInput = screen.getByPlaceholderText('Pincode');
+    const pincodeInput = screen.getByPlaceholderText('Pincode (6 digits)');
 
     fireEvent.change(addressInput, { target: { value: '123 Test St' } });
     fireEvent.change(cityInput, { target: { value: 'Mumbai' } });
@@ -220,7 +220,7 @@ describe('CheckoutView Component', () => {
 
     const addressInput = screen.getByPlaceholderText('Address');
     const cityInput = screen.getByPlaceholderText('City');
-    const pincodeInput = screen.getByPlaceholderText('Pincode');
+    const pincodeInput = screen.getByPlaceholderText('Pincode (6 digits)');
 
     fireEvent.change(addressInput, { target: { value: '123 Test St' } });
     fireEvent.change(cityInput, { target: { value: 'Mumbai' } });
