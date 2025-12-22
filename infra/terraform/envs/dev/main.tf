@@ -77,11 +77,5 @@ module "ecr" {
   max_image_count      = 5      # Keep fewer images
 }
 
-# ACM Certificate for HTTPS
-module "acm" {
-  source = "../../modules/acm"
-  
-  project_name = var.project_name
-  environment  = var.environment
-  domain_name  = var.domain_name
-}
+# Future modules:
+# - Route53 and ACM certificates

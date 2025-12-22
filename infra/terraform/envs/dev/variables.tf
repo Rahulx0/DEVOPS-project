@@ -15,9 +15,3 @@ variable "environment" {
   type        = string
   default     = "dev"
 }
-
-variable "domain_name" {
-  description = "Domain name for SSL certificate"
-  type        = string
-  default     = "urbangear.qzz.io"
-}
