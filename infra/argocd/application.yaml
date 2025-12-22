@@ -1,20 +1,39 @@
+# ArgoCD Application resource for deploying urbangear-frontend
 apiVersion: argoproj.io/v1alpha1
 kind: Application
+# Metadata section defining the application name and namespace
 metadata:
   name: urbangear-frontend
   namespace: argocd
+# Spec section defining deployment source, destination, and sync policy
 spec:
+  # ArgoCD project name
   project: default
+  # Source configuration for the Git repository and path
   source:
+    # URL of the Git repository containing the manifests
     repoURL: https://github.com/Rahulx0/DEVOPS-project.git
+    # Branch or commit to deploy from
     targetRevision: rahul
+    # Path to the manifests directory in the repo
     path: manifests/overlays/prod
+  # Destination cluster and namespace for deployment
   destination:
+    # Kubernetes cluster server URL
     server: https://kubernetes.default.svc
+    # Namespace to deploy the application into
     namespace: default
+  # Sync policy for automated deployment
   syncPolicy:
+    # Enable automated syncing
     automated:
+      # Automatically remove resources not in Git
       prune: true
+      # Automatically correct drift from desired state
       selfHeal: true
+    # Additional sync options
     syncOptions:
+      # Create the namespace if it doesn't exist
       - CreateNamespace=true
+
+

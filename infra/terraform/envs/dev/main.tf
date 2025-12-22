@@ -2,6 +2,7 @@
 # TODO: Configure backend after bootstrap is complete
 
 terraform {
+  # Specify required Terraform version and providers
   required_version = ">= 1.7"
   required_providers {
     aws = {
@@ -19,6 +20,7 @@ terraform {
   }
 }
 
+# AWS provider configuration
 provider "aws" {
   region = "us-east-1"
   

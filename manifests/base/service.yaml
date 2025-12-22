@@ -1,11 +1,17 @@
+# Kubernetes Service resource for urbangear-frontend
 apiVersion: v1
 kind: Service
+# Metadata defining the service's identity
 metadata:
   name: urbangear-frontend
+# Specification for the service behavior
 spec:
+  # Service type (LoadBalancer for external access)
   type: LoadBalancer
+  # Selector to match pods for load balancing
   selector:
     app: urbangear-frontend
+  # Port mappings for the service
   ports:
     - port: 80
       targetPort: 80

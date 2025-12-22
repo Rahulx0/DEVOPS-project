@@ -1,6 +1,7 @@
 # ECR Repository Module for UrbanGear E-commerce Platform
 # Creates ECR repository for storing container images
 
+# ECR repository resource
 resource "aws_ecr_repository" "main" {
   name                 = "${var.project_name}-${var.environment}-frontend"
   image_tag_mutability = var.image_tag_mutability

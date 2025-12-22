@@ -1,26 +1,39 @@
+# Kubernetes Deployment resource for urbangear-frontend
 apiVersion: apps/v1
 kind: Deployment
+# Metadata defining the deployment's identity and labels
 metadata:
   name: urbangear-frontend
   namespace: default
   labels:
     app: urbangear-frontend
+# Specification for the deployment behavior
 spec:
+  # Number of pod replicas to maintain
   replicas: 1
+  # Selector to match pods managed by this deployment
   selector:
     matchLabels:
       app: urbangear-frontend
+  # Pod template specification
   template:
+    # Metadata for pods created from this template
     metadata:
       labels:
         app: urbangear-frontend
+    # Specification for the pod's containers and volumes
     spec:
+      # List of containers to run in the pod
       containers:
+      # Configuration for the frontend container
       - name: frontend
+        # Docker image for the frontend application
         image: 924612597584.dkr.ecr.us-east-1.amazonaws.com/urbangear-dev-frontend:latest
+        # Ports exposed by the container
         ports:
         - containerPort: 80
           name: http
+        # Resource requests and limits for the container
         resources:
           requests:
             memory: "64Mi"
@@ -28,12 +41,14 @@ spec:
           limits:
             memory: "256Mi"
             cpu: "200m"
+        # Probe to check if the container is ready to receive traffic
         readinessProbe:
           httpGet:
             path: /
             port: 80
           initialDelaySeconds: 5
           periodSeconds: 5
+        # Probe to check if the container is alive and restart if not
         livenessProbe:
           httpGet:
             path: /
@@ -41,28 +56,37 @@ spec:
           initialDelaySeconds: 30
           periodSeconds: 10
 ---
+# Kubernetes Service to expose the urbangear-frontend deployment
 apiVersion: v1
 kind: Service
+# Metadata for the service
 metadata:
   name: urbangear-frontend-service
   namespace: default
   labels:
     app: urbangear-frontend
+# Specification for the service
 spec:
+  # Selector to match pods
   selector:
     app: urbangear-frontend
+  # Port configurations for the service
   ports:
   - port: 80
     targetPort: 80
     protocol: TCP
     name: http
+  # Service type (ClusterIP for internal access)
   type: ClusterIP
 ---
+# Ingress resource to route external traffic to the frontend service
 apiVersion: networking.k8s.io/v1
 kind: Ingress
+# Metadata for the ingress
 metadata:
   name: urbangear-frontend-ingress
   namespace: default
+  # Annotations for ingress controller configuration
   annotations:
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/scheme: internet-facing
@@ -70,12 +94,17 @@ metadata:
     alb.ingress.kubernetes.io/healthcheck-path: /
   labels:
     app: urbangear-frontend
+# Specification for ingress routing rules
 spec:
+  # Routing rules for incoming requests
   rules:
+  # HTTP routing configuration
   - http:
+      # Path-based routing
       paths:
       - path: /
         pathType: Prefix
+        # Backend service to route traffic to
         backend:
           service:
             name: urbangear-frontend-service

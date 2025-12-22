@@ -26,6 +26,7 @@ echo ""
 echo "Checking EKS cluster status..."
 CLUSTER_STATUS=$(aws eks describe-cluster --name $EKS_CLUSTER --region $AWS_REGION --query 'cluster.status' --output text 2>/dev/null || echo "NOT_FOUND")
 
+# If cluster not found, skip Kubernetes-specific cleanup
 if [ "$CLUSTER_STATUS" = "NOT_FOUND" ]; then
     echo "✅ Cluster already destroyed"
 else
@@ -61,6 +62,7 @@ echo "   • NAT Gateway and Elastic IPs"
 echo ""
 read -p "Are you sure you want to continue? (yes/no): " confirm
 
+# If user does not confirm, exit the script
 if [ "$confirm" != "yes" ]; then
     echo "❌ Operation cancelled"
     exit 0
@@ -131,6 +133,7 @@ cleanup_autoscaling_and_instances() {
     LAUNCH_TEMPLATE_IDS=$(aws ec2 describe-launch-templates --region $AWS_REGION --query "LaunchTemplates[?contains(LaunchTemplateName, 'eks-') && contains(LaunchTemplateName, 'urbangear')].LaunchTemplateId" --output text 2>/dev/null || echo "")
     
     if [ -n "$LAUNCH_TEMPLATE_IDS" ] && [ "$LAUNCH_TEMPLATE_IDS" != "None" ]; then
+        # Loop through launch templates and delete them
         for LT_ID in $LAUNCH_TEMPLATE_IDS; do
             echo "   Deleting launch template: $LT_ID"
             aws ec2 delete-launch-template --launch-template-id "$LT_ID" --region $AWS_REGION 2>/dev/null || true
@@ -151,6 +154,7 @@ cleanup_ecr() {
         echo "   Deleting ECR images..."
         aws ecr list-images --repository-name $ECR_REPO --region $AWS_REGION --query 'imageIds[*]' --output json > /tmp/images.json 2>/dev/null || echo "[]" > /tmp/images.json
         
+        # If images exist, delete them
         if [ -s /tmp/images.json ] && [ "$(cat /tmp/images.json)" != "[]" ]; then
             aws ecr batch-delete-image --repository-name $ECR_REPO --region $AWS_REGION --image-ids file:///tmp/images.json >/dev/null 2>&1 || true
             echo "   ECR images deleted"
@@ -176,7 +180,8 @@ cleanup_aws_resources_manual() {
     
     # Get VPC ID if it exists
     VPC_ID=$(aws ec2 describe-vpcs --filters "Name=tag:Project,Values=urbangear" --region $AWS_REGION --query 'Vpcs[0].VpcId' --output text 2>/dev/null || echo "None")
-    
+
+    # If VPC exists, proceed with manual cleanup
     if [ "$VPC_ID" != "None" ] && [ "$VPC_ID" != "null" ]; then
         echo "   Found VPC: $VPC_ID"
         
@@ -306,16 +311,19 @@ cleanup_dns() {
     
     # Check if domain uses Route 53
     HOSTED_ZONE_ID=$(aws route53 list-hosted-zones --query "HostedZones[?contains(Name, 'qzz.io')].Id" --output text 2>/dev/null | head -1 || echo "")
-    
+
+    # If hosted zone exists, proceed with DNS cleanup
     if [ -n "$HOSTED_ZONE_ID" ] && [ "$HOSTED_ZONE_ID" != "None" ]; then
         echo "   Found Route 53 hosted zone: $HOSTED_ZONE_ID"
         
         # Check if DNS record exists
         EXISTING_RECORD=$(aws route53 list-resource-record-sets --hosted-zone-id "$HOSTED_ZONE_ID" --query "ResourceRecordSets[?Name=='$DOMAIN_NAME.'].ResourceRecords[0].Value" --output text 2>/dev/null || echo "")
-        
+
+        # If DNS record exists, delete it
         if [ -n "$EXISTING_RECORD" ] && [ "$EXISTING_RECORD" != "None" ]; then
             echo "   Deleting DNS record for $DOMAIN_NAME..."
-            
+
+            # Create JSON for DNS deletion
             cat > /tmp/dns-delete.json << EOF
 {
     "Changes": [
@@ -336,6 +344,7 @@ cleanup_dns() {
 }
 EOF
 
+            # Delete the DNS record
             aws route53 change-resource-record-sets --hosted-zone-id "$HOSTED_ZONE_ID" --change-batch file:///tmp/dns-delete.json >/dev/null 2>&1 || true
             rm -f /tmp/dns-delete.json
             echo "   DNS record deleted"
@@ -360,17 +369,22 @@ cleanup_ecr
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 WORKSPACE_ROOT="$( cd "$SCRIPT_DIR/.." && pwd )"
 
+# Change to Terraform dev environment directory
 cd "$WORKSPACE_ROOT/infra/terraform/envs/dev"
 
 echo "Step 4: Attempting Terraform destroy..."
+# Initialize Terraform
 terraform init -input=false >/dev/null 2>&1
 
 # Quick destroy attempt
+# Attempt Terraform destroy with 5-minute timeout
 timeout 300 terraform destroy -auto-approve 2>/dev/null || {
     echo "   Terraform destroy timed out or failed, proceeding with manual cleanup..."
+    # If Terraform fails, perform manual cleanup
     cleanup_aws_resources_manual
 }
 
+# Return to workspace root
 cd "$WORKSPACE_ROOT"
 
 echo ""
@@ -409,6 +423,7 @@ echo "   ALB/NLB Load Balancers: ${ALB_CHECK:-None}"
 # Check Classic Load Balancers (these cost money!)
 ELB_CHECK=$(aws elb describe-load-balancers --region $AWS_REGION --query "LoadBalancerDescriptions[?contains(LoadBalancerName, 'k8s') || contains(LoadBalancerName, 'urbangear') || contains(LoadBalancerName, 'a957fff') || contains(LoadBalancerName, 'a1e9436') || contains(LoadBalancerName, 'a328b41')].LoadBalancerName" --output text 2>/dev/null || echo "None")
 echo "   Classic Load Balancers: ${ELB_CHECK:-None}"
+# If ELBs found, warn about potential costs
 if [ "$ELB_CHECK" != "None" ] && [ -n "$ELB_CHECK" ]; then
     echo "   ⚠️  WARNING: Classic Load Balancers found - these cost ~$18/month!"
 fi
@@ -420,6 +435,7 @@ echo "========================================"
 echo ""
 
 # Final cost verification
+# If all resources are destroyed, confirm no ongoing costs
 if [ "$ELB_CHECK" = "None" ] && [ "$CLUSTER_CHECK" = "NOT_FOUND" ] && [ "$VPC_CHECK" = "None" ] && [ "$ECR_CHECK" = "None" ] && [ "$INSTANCE_CHECK" = "None" ] && [ "$ASG_CHECK" = "None" ]; then
     echo "💰 ✅ COST STATUS: $0/hour - All billable resources destroyed!"
     echo "🎉 Perfect cleanup - No ongoing AWS charges!"

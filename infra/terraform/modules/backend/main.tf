@@ -1,6 +1,7 @@
 # Terraform Backend Module
 # Creates S3 bucket and DynamoDB table for remote state management
 
+# S3 bucket for Terraform state
 resource "aws_s3_bucket" "terraform_state" {
   bucket = var.bucket_name
 
@@ -11,6 +12,7 @@ resource "aws_s3_bucket" "terraform_state" {
   }
 }
 
+# Enable versioning on the S3 bucket
 resource "aws_s3_bucket_versioning" "terraform_state" {
   bucket = aws_s3_bucket.terraform_state.id
   versioning_configuration {
@@ -18,6 +20,7 @@ resource "aws_s3_bucket_versioning" "terraform_state" {
   }
 }
 
+# Configure server-side encryption
 resource "aws_s3_bucket_server_side_encryption_configuration" "terraform_state" {
   bucket = aws_s3_bucket.terraform_state.id
 
@@ -28,6 +31,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "terraform_state" 
   }
 }
 
+# Block public access to the bucket
 resource "aws_s3_bucket_public_access_block" "terraform_state" {
   bucket = aws_s3_bucket.terraform_state.id
 
@@ -37,6 +41,7 @@ resource "aws_s3_bucket_public_access_block" "terraform_state" {
   restrict_public_buckets = true
 }
 
+# DynamoDB table for state locking
 resource "aws_dynamodb_table" "terraform_locks" {
   name           = var.dynamodb_table_name
   billing_mode   = "PAY_PER_REQUEST"

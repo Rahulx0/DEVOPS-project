@@ -1,16 +1,18 @@
+// Import custom matchers for Jest DOM assertions
 import '@testing-library/jest-dom';
+// Import Vitest mocking utilities
 import { vi } from 'vitest';
 
-// Mock Firebase
+// Mock Firebase module to avoid real network/database calls in tests
 vi.mock('../lib/firebase', () => ({
-  getProducts: vi.fn(() => Promise.resolve([])),
-  getProductById: vi.fn(() => Promise.resolve(null)),
-  addProduct: vi.fn(() => Promise.resolve(1)),
-  deleteProduct: vi.fn(() => Promise.resolve()),
-  db: {},
+  getProducts: vi.fn(() => Promise.resolve([])), // Mock getProducts to return empty array
+  getProductById: vi.fn(() => Promise.resolve(null)), // Mock getProductById to return null
+  addProduct: vi.fn(() => Promise.resolve(1)), // Mock addProduct to return 1
+  deleteProduct: vi.fn(() => Promise.resolve()), // Mock deleteProduct to resolve
+  db: {}, // Mock db object
 }));
 
-// Mock window.matchMedia
+// Mock window.matchMedia for components using media queries
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
   value: vi.fn().mockImplementation(query => ({
@@ -25,10 +27,10 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
-// Mock scrollIntoView
+// Mock scrollIntoView to prevent errors in tests
 Element.prototype.scrollIntoView = vi.fn();
 
-// Mock Razorpay as a class
+// Mock Razorpay payment gateway as a class for tests
 class MockRazorpay {
   open = vi.fn();
 }

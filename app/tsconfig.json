@@ -1,29 +1,44 @@
 {
   "compilerOptions": {
+    // Target ECMAScript version
     "target": "ES2022",
+    // Enable experimental decorators
     "experimentalDecorators": true,
+    // Use standard class field definitions
     "useDefineForClassFields": false,
+    // Module system to use
     "module": "ESNext",
+    // Libraries to include in the compilation
     "lib": [
       "ES2022",
       "DOM",
       "DOM.Iterable"
     ],
+    // Skip type checking of declaration files
     "skipLibCheck": true,
+    // Include Node.js types
     "types": [
       "node"
     ],
+    // Module resolution strategy
     "moduleResolution": "bundler",
+    // Treat each file as a separate module
     "isolatedModules": true,
+    // Force module detection
     "moduleDetection": "force",
+    // Allow JavaScript files to be compiled
     "allowJs": true,
+    // Use React JSX transform
     "jsx": "react-jsx",
+    // Path alias for imports
     "paths": {
       "@/*": [
         "./*"
       ]
     },
+    // Allow importing TypeScript extensions
     "allowImportingTsExtensions": true,
+    // Do not emit output files
     "noEmit": true
   }
 }

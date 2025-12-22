@@ -31,6 +31,7 @@ fi
 CURRENT_BRANCH=$(git branch --show-current)
 echo "Current branch: $CURRENT_BRANCH"
 
+# Check if on the required 'rahul' branch and prompt to switch if not
 if [ "$CURRENT_BRANCH" != "rahul" ]; then
     echo "⚠️  Warning: You're not on 'rahul' branch"
     read -p "Switch to 'rahul' branch? (y/n): " -n 1 -r
@@ -64,3 +65,4 @@ echo "  • ArgoCD: kubectl port-forward svc/argocd-server -n argocd 8080:443"
 echo "  • Grafana: kubectl port-forward -n monitoring svc/prometheus-grafana 3000:80"
 echo ""
 echo "=========================================="
+

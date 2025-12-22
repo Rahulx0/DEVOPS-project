@@ -1,28 +1,37 @@
+# RBAC Role granting developer permissions in default namespace
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: developer
   namespace: default
+# Rules defining permissions for the role
 rules:
+  # Read-only access to core resources
   - apiGroups: [""]
     resources: ["pods", "pods/log", "services", "configmaps"]
     verbs: ["get", "list", "watch"]
+  # CRUD access to deployments and replicasets
   - apiGroups: ["apps"]
     resources: ["deployments", "replicasets"]
     verbs: ["get", "list", "watch", "create", "update", "patch"]
+  # Read-only access to ingresses
   - apiGroups: ["networking.k8s.io"]
     resources: ["ingresses"]
     verbs: ["get", "list", "watch"]
 ---
+# RoleBinding to bind developer role to developers group
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: developer-binding
   namespace: default
+# Subjects (users/groups) to bind the role to
 subjects:
+  # Bind to the 'developers' group
   - kind: Group
     name: developers
     apiGroup: rbac.authorization.k8s.io
+# Reference to the role being bound
 roleRef:
   kind: Role
   name: developer

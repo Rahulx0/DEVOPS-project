@@ -1,22 +1,32 @@
+# Kustomization configuration for production overlay
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+# Base resources to include
 resources:
 - ../../base
 
+# Patches to apply to base resources
 patches:
+# Patch file for deployment
 - path: deployment-patch.yaml
 
+# Replica overrides for production
 replicas:
+# Deployment to scale
 - name: urbangear-frontend
   count: 1
 
+# Production environment labels
 labels:
+# Label key-value pairs for production
 - pairs:
     environment: prod
   includeSelectors: true
   includeTemplates: true
 
+# Image transformations for production
 images:
+# Image to transform with production tag
 - name: PLACEHOLDER_ECR_URI
   newTag: latest

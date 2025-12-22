@@ -1,46 +1,69 @@
+# Define services
 services:
+  # Frontend application service
   frontend:
+    # Build configuration
     build:
+      # Build context directory
       context: ./app
+      # Target build stage
       target: prod
+    # Image name for local builds
     image: urbangear/frontend:local
+    # Port mapping
     ports:
       - "8080:80"
 
+  # SonarQube service
   sonarqube:
+    # SonarQube image version
     image: sonarqube:10.8-community
+    # Container name
     container_name: sonarqube
+    # Dependency on database
     depends_on:
       - sonarqube-db
+    # Environment variables for database connection
     environment:
       SONAR_JDBC_URL: jdbc:postgresql://sonarqube-db:5432/sonar
       SONAR_JDBC_USERNAME: sonar
       SONAR_JDBC_PASSWORD: sonar
+    # Persistent volumes for data, extensions, logs
     volumes:
       - sonarqube_data:/opt/sonarqube/data
       - sonarqube_extensions:/opt/sonarqube/extensions
       - sonarqube_logs:/opt/sonarqube/logs
+    # Port mapping for web interface
     ports:
       - "9000:9000"
+    # File descriptor limits
     ulimits:
       nofile:
         soft: 65536
         hard: 65536
+    # System control settings
     sysctls:
       - vm.max_map_count=524288
 
+  # PostgreSQL database for SonarQube
   sonarqube-db:
+    # PostgreSQL image version
     image: postgres:15
+    # Container name
     container_name: sonarqube-db
+    # Database credentials
     environment:
       POSTGRES_USER: sonar
       POSTGRES_PASSWORD: sonar
       POSTGRES_DB: sonar
+    # Persistent volume for data
     volumes:
       - postgresql_data:/var/lib/postgresql/data
+    # Port mapping for database
     ports:
       - "5432:5432"
 
+# Define named volumes
 volumes:
   sonarqube_data:
   sonarqube_extensions:

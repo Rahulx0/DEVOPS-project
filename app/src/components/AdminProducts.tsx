@@ -3,8 +3,10 @@ import { addProduct, deleteProduct } from '../lib/firebase';
 import { useProducts } from '../hooks/useProducts';
 import { sampleProducts } from '../scripts/seedProducts';
 
+// Admin component for managing products
 const AdminProducts: React.FC = () => {
   const { products, loading, error } = useProducts();
+  // State for form data, submitting status, message, and selected product ids
   const [formData, setFormData] = useState({
     name: '',
     price: '',
@@ -16,6 +18,7 @@ const AdminProducts: React.FC = () => {
   const [message, setMessage] = useState('');
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
+  // Handle form submission to add new product
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
@@ -39,12 +42,14 @@ const AdminProducts: React.FC = () => {
     }
   };
 
+  // Toggle selection of a product
   const toggleSelect = (id: number) => {
     setSelectedIds(prev => 
       prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
     );
   };
 
+  // Select or deselect all products
   const selectAll = () => {
     if (selectedIds.length === products.length) {
       setSelectedIds([]);
@@ -237,3 +242,4 @@ const AdminProducts: React.FC = () => {
 };
 
 export default AdminProducts;
+

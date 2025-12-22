@@ -1,14 +1,24 @@
+# Kubernetes Deployment patch for production environment
 apiVersion: apps/v1
 kind: Deployment
+# Metadata for the deployment patch
 metadata:
   name: urbangear-frontend
+# Specification patches for production
 spec:
+  # Number of replicas for production
   replicas: 1
+  # Pod template patches
   template:
+    # Container specification patches
     spec:
+      # Container patches
       containers:
+      # Frontend container patch
       - name: frontend
+        # Production image
         image: 924612597584.dkr.ecr.us-east-1.amazonaws.com/urbangear-dev-frontend:latest
+        # Production resource limits
         resources:
           requests:
             memory: "128Mi"

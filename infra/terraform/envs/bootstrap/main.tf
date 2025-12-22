@@ -3,6 +3,7 @@
 # Run this FIRST before any other Terraform configurations
 
 terraform {
+  # Specify required Terraform version and providers
   required_version = ">= 1.7"
   required_providers {
     aws = {
@@ -12,6 +13,7 @@ terraform {
   }
 }
 
+# AWS provider configuration
 provider "aws" {
   region = var.aws_region
   
@@ -24,15 +26,16 @@ provider "aws" {
   }
 }
 
-# Generate a unique bucket name
 locals {
   bucket_name = "${var.project_name}-terraform-state-${random_id.bucket_suffix.hex}"
 }
 
+# Random ID for bucket suffix
 resource "random_id" "bucket_suffix" {
   byte_length = 4
 }
 
+# Backend module for S3 and DynamoDB
 module "backend" {
   source = "../../modules/backend"
   

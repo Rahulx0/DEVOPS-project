@@ -1,17 +1,23 @@
+# Kustomization configuration for base Kubernetes manifests
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+# List of resource files to include in the kustomization
 resources:
 - deployment.yaml
 - service.yaml
 
+# Common labels to add to all resources
 labels:
+# Label key-value pairs to add
 - pairs:
     project: urbangear
     environment: dev
   includeSelectors: true
   includeTemplates: true
 
+# Image transformations for container images
 images:
+# Image to transform with new tag
 - name: PLACEHOLDER_ECR_URI
   newTag: latest

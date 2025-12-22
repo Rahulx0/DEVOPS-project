@@ -1,5 +1,7 @@
+# Name of the GitHub Actions workflow
 name: Build and Deploy
 
+# Triggers for the workflow
 on:
   push:
     branches:
@@ -16,7 +18,9 @@ env:
   EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME || 'urbangear-dev-cluster' }}
   KUBE_NAMESPACE: default
 
+# Define jobs
 jobs:
+  # Job to set up AWS infrastructure
   setup-infrastructure:
     name: Setup AWS Infrastructure
     runs-on: ubuntu-latest

@@ -54,6 +54,7 @@ echo ""
 echo "🌐 APPLICATION"
 echo "----------------------------------------"
 ALB_URL=$(kubectl get ingress urbangear-frontend-ingress -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null)
+# Check if ALB URL is available and display application URLs
 if [ -n "$ALB_URL" ]; then
     echo "   URL:   http://${ALB_URL}"
     echo "   Admin: http://${ALB_URL}/?admin=true"
@@ -65,6 +66,7 @@ echo ""
 # ArgoCD
 echo "🔄 ARGOCD (GitOps)"
 echo "----------------------------------------"
+# Check if ArgoCD namespace exists and retrieve admin credentials
 if kubectl get namespace argocd &>/dev/null; then
     ARGOCD_PASS=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" 2>/dev/null | base64 -d)
     echo "   URL:      https://localhost:8080"
@@ -78,6 +80,7 @@ echo ""
 # Grafana
 echo "📊 GRAFANA (Monitoring)"
 echo "----------------------------------------"
+# Check if monitoring namespace exists and retrieve Grafana credentials
 if kubectl get namespace monitoring &>/dev/null; then
     echo "   URL:      http://localhost:3000"
     echo "   Username: admin"
@@ -91,6 +94,7 @@ echo ""
 # Prometheus
 echo "📈 PROMETHEUS (Metrics)"
 echo "----------------------------------------"
+# Check if monitoring namespace exists and display Prometheus URL
 if kubectl get namespace monitoring &>/dev/null; then
     echo "   URL:      http://localhost:9090"
 else
