@@ -209,7 +209,7 @@ To remove everything:
 
 ```bash
 # Delete application
-kubectl delete -k manifests/overlays/prod/
+kubectl delete -k Phase3_Deployment/overlays/prod/
 
 # Delete monitoring
 helm uninstall prometheus -n monitoring
@@ -222,7 +222,7 @@ kubectl delete namespace argocd
 helm uninstall aws-load-balancer-controller -n kube-system
 
 # Destroy infrastructure
-cd infra/terraform/envs/dev
+cd Phase3_Deployment/infra/terraform/envs/dev
 terraform destroy
 ```
 

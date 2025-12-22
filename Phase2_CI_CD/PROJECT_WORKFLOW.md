@@ -28,6 +28,33 @@
 - ✅ RBAC & Network Policies
 - ✅ Auto-scaling infrastructure
 
+### Recent Project Reorganization (December 2024)
+
+The project has been restructured into three distinct phases for better organization and maintainability:
+
+#### **Phase 1: Development** (`Phase1_Development/`)
+- Contains the React frontend application
+- Includes all source code, tests, and containerization
+- Dockerfile and build configurations
+
+#### **Phase 2: CI/CD** (`Phase2_CI_CD/`)
+- Houses CI/CD pipeline configurations
+- Contains base Kubernetes manifests
+- Automation scripts (start.sh, stop.sh, status.sh)
+- SonarCloud configuration
+
+#### **Phase 3: Deployment** (`Phase3_Deployment/`)
+- Infrastructure as Code (Terraform)
+- Production overlays and patches
+- ArgoCD configurations
+- Security policies (RBAC, Network Policies)
+
+**Benefits of New Structure**:
+- 🎯 **Clear Separation**: Each phase has distinct responsibilities
+- 📁 **Better Organization**: Easier to navigate and maintain
+- 🔄 **Scalable**: Supports future expansion and team collaboration
+- 🛠️ **Phase-based Development**: Logical workflow progression
+
 ---
 
 ## Architecture Diagram
@@ -262,7 +289,7 @@
 ### Terraform Structure
 
 ```
-infra/terraform/
+Phase3_Deployment/infra/terraform/
 ├── envs/
 │   └── dev/
 │       ├── main.tf           # Main configuration
@@ -703,7 +730,7 @@ Destroys all AWS resources to avoid charges.
 
 #### Deploy Application Only
 ```bash
-kubectl apply -k manifests/overlays/prod/
+kubectl apply -k Phase3_Deployment/overlays/prod/
 ```
 
 #### Update Application
@@ -841,7 +868,7 @@ pkill -f "kubectl port-forward"
 **Solution**:
 ```bash
 # Check state
-cd infra/terraform/envs/dev
+cd Phase3_Deployment/infra/terraform/envs/dev
 terraform state list
 
 # Import existing resource

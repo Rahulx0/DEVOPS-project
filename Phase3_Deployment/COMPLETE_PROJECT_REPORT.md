@@ -10,7 +10,7 @@
 
 ## Executive Summary
 
-This project implements a complete production-grade DevOps pipeline for an e-commerce application (UrbanGear) deployed on AWS EKS. The project demonstrates end-to-end automation including infrastructure provisioning, CI/CD pipelines, monitoring, security, and HTTPS configuration.
+This project implements a complete production-grade DevOps pipeline for an e-commerce application (UrbanGear) deployed on AWS EKS. The project demonstrates end-to-end automation including infrastructure provisioning, CI/CD pipelines, monitoring, security, and containerization across three organized phases.
 
 **Technology Stack**:
 - **Frontend**: React + TypeScript + Vite
@@ -20,7 +20,7 @@ This project implements a complete production-grade DevOps pipeline for an e-com
 - **Monitoring**: Prometheus + Grafana
 - **Security**: Trivy, SonarCloud, RBAC, Network Policies
 - **Container Registry**: AWS ECR
-- **Load Balancing**: AWS ALB with SSL/TLS
+- **Load Balancing**: AWS ALB
 
 **Cost**: ~$143/month (optimized with SPOT instances)
 
@@ -28,25 +28,88 @@ This project implements a complete production-grade DevOps pipeline for an e-com
 
 ## Project Structure Overview
 
+The project is organized into three distinct phases for better maintainability and separation of concerns:
+
 ```
 DEVOPS-project/
-├── .github/workflows/       # CI/CD pipeline definitions
-├── app/                     # React frontend application
-├── backend/                 # Payment backend (Node.js/Express)
-├── infra/                   # Infrastructure as Code
-│   ├── terraform/          # AWS infrastructure provisioning
-│   ├── kubernetes/         # K8s security configs
-│   └── argocd/            # GitOps application definitions
-├── manifests/              # Kubernetes deployment manifests
-├── scripts/                # Automation scripts
-└── docs/                   # Project documentation
+├── .github/workflows/           # CI/CD pipeline definitions
+├── sonar-project.properties     # SonarCloud configuration (root level)
+├── Phase1_Development/          # 🏗️ APPLICATION DEVELOPMENT
+│   └── app/                     # React frontend application
+│       ├── src/                 # Source code
+│       ├── Dockerfile           # Container configuration
+│       ├── package.json         # Dependencies
+│       └── vite.config.ts       # Build configuration
+├── Phase2_CI_CD/               # 🚀 CI/CD & BASE MANIFESTS
+│   ├── .github/                # Additional CI/CD configs
+│   ├── base/                   # Base Kubernetes manifests
+│   │   ├── deployment.yaml     # Application deployment
+│   │   ├── service.yaml        # Service configuration
+│   │   └── kustomization.yaml  # Base kustomization
+│   ├── scripts/                # Automation scripts
+│   │   ├── start.sh           # Deploy complete stack
+│   │   ├── stop.sh            # Destroy all resources
+│   │   └── status.sh          # Check deployment status
+│   └── sonar-project.properties # SonarCloud config (backup)
+└── Phase3_Deployment/          # 🌐 INFRASTRUCTURE & DEPLOYMENT
+    ├── infra/                  # Infrastructure as Code
+    │   ├── terraform/          # AWS infrastructure provisioning
+    │   ├── kubernetes/         # K8s security configs (RBAC, Network Policies)
+    │   └── argocd/            # GitOps application definitions
+    ├── overlays/              # Environment-specific manifests
+    │   └── prod/              # Production overlays
+    │       ├── deployment-patch.yaml  # Production patches
+    │       └── kustomization.yaml     # Production kustomization
+    └── docs/                  # Project documentation
 ```
+
+### Phase Organization Benefits
+
+1. **Phase1_Development**: Contains all application code and containerization
+2. **Phase2_CI_CD**: Houses CI/CD configurations, base manifests, and automation scripts
+3. **Phase3_Deployment**: Manages infrastructure, overlays, and deployment configurations
+
+This structure provides:
+- ✅ Clear separation of concerns
+- ✅ Easy navigation and maintenance
+- ✅ Scalable project organization
+- ✅ Phase-based development workflow
+
+---
+
+## Recent Updates & Fixes (December 2024)
+
+### 🔧 **Project Structure Reorganization**
+The project has been reorganized into three distinct phases for better maintainability:
+
+**Key Changes**:
+- ✅ **Phase1_Development/**: All application code and containerization
+- ✅ **Phase2_CI_CD/**: CI/CD configurations, base manifests, and automation scripts  
+- ✅ **Phase3_Deployment/**: Infrastructure, overlays, and deployment configurations
+
+### 🐛 **Critical Path Fixes Applied**
+1. **ArgoCD Application Path**: Updated from `manifests/overlays/prod` → `Phase3_Deployment/overlays/prod`
+2. **GitHub Actions Workflow**: Fixed all deployment manifest paths and coverage file paths
+3. **Kustomization Base Reference**: Updated from `../../base` → `../../../Phase2_CI_CD/base`
+4. **SonarCloud Configuration**: Added `sonar-project.properties` to root directory (required by SonarCloud)
+5. **Network Policies Path**: Updated to `Phase3_Deployment/infra/kubernetes/network-policies/`
+
+### 🚀 **Application Fixes Verified**
+- ✅ **Pincode Validation**: Fixed to accept valid 6-digit pincodes like "144401" (removed restrictive validation)
+- ✅ **Razorpay Payment Gateway**: Fixed payment initialization with proper `window.Razorpay` check
+- ✅ **Duplicate Toast Issue**: Removed duplicate "Add to Cart" notifications
+
+### 📊 **Pipeline Status**
+- ✅ All path references updated for new project structure
+- ✅ Coverage file path fixed: `Phase1_Development/app/coverage/lcov.info`
+- ✅ SonarCloud scan configuration corrected
+- ✅ Complete DevOps stack deployment working
 
 ---
 
 # PHASE 1: APPLICATION DEVELOPMENT & CONTAINERIZATION
 
-## 1.1 Frontend Application (`app/`)
+## 1.1 Frontend Application (`Phase1_Development/app/`)
 
 ### Core Application Files
 
@@ -72,7 +135,7 @@ DEVOPS-project/
 
 ---
 
-#### `app/src/App.tsx`
+#### `Phase1_Development/app/src/App.tsx`
 **Purpose**: Root component that manages application routing and view state.
 
 **Key Features**:
@@ -93,7 +156,7 @@ DEVOPS-project/
 
 ---
 
-#### `app/src/main.tsx`
+#### `Phase1_Development/app/src/main.tsx`
 **Purpose**: Application entry point that mounts React to the DOM.
 
 **Functionality**:
@@ -108,7 +171,7 @@ DEVOPS-project/
 
 ### Component Architecture
 
-#### `app/src/components/Header.tsx`
+#### `Phase1_Development/app/src/components/Header.tsx`
 **Purpose**: Navigation bar with cart, wishlist, and theme toggle.
 
 **Features**:
@@ -122,7 +185,7 @@ DEVOPS-project/
 
 ---
 
-#### `app/src/components/Team.tsx` (Checkout Component)
+#### `Phase1_Development/app/src/components/Team.tsx` (Checkout Component)
 **Purpose**: Handles checkout process and payment integration.
 
 **Key Functionality**:
@@ -144,7 +207,7 @@ DEVOPS-project/
 
 ---
 
-#### `app/src/components/AdminProducts.tsx`
+#### `Phase1_Development/app/src/components/AdminProducts.tsx`
 **Purpose**: Admin interface for product management.
 
 **Features**:
@@ -158,7 +221,7 @@ DEVOPS-project/
 
 ---
 
-#### `app/src/components/ProductDetail.tsx`
+#### `Phase1_Development/app/src/components/ProductDetail.tsx`
 **Purpose**: Displays detailed product information.
 
 **Features**:
@@ -174,7 +237,7 @@ DEVOPS-project/
 
 ### Context & State Management
 
-#### `app/src/context/CartContext.tsx`
+#### `Phase1_Development/app/src/context/CartContext.tsx`
 **Purpose**: Global cart state management using React Context API.
 
 **State Managed**:
@@ -192,7 +255,7 @@ DEVOPS-project/
 
 ---
 
-#### `app/src/context/WishlistContext.tsx`
+#### `Phase1_Development/app/src/context/WishlistContext.tsx`
 **Purpose**: Manages user's wishlist items.
 
 **Features**:
@@ -205,7 +268,7 @@ DEVOPS-project/
 
 ---
 
-#### `app/src/context/ThemeContext.tsx`
+#### `Phase1_Development/app/src/context/ThemeContext.tsx`
 **Purpose**: Manages dark/light theme preference.
 
 **Functionality**:
@@ -217,7 +280,7 @@ DEVOPS-project/
 
 ---
 
-#### `app/src/context/ToastContext.tsx`
+#### `Phase1_Development/app/src/context/ToastContext.tsx`
 **Purpose**: Global notification system.
 
 **Features**:
@@ -232,7 +295,7 @@ DEVOPS-project/
 
 ### Custom Hooks
 
-#### `app/src/hooks/useCart.ts`
+#### `Phase1_Development/app/src/hooks/useCart.ts`
 **Purpose**: Hook to access cart context in components.
 
 **Returns**: Cart state and methods from CartContext.
@@ -241,7 +304,7 @@ DEVOPS-project/
 
 ---
 
-#### `app/src/hooks/useWishlist.ts`
+#### `Phase1_Development/app/src/hooks/useWishlist.ts`
 **Purpose**: Hook to access wishlist functionality.
 
 **Returns**: Wishlist state and methods.
@@ -250,7 +313,7 @@ DEVOPS-project/
 
 ---
 
-#### `app/src/hooks/useProducts.ts`
+#### `Phase1_Development/app/src/hooks/useProducts.ts`
 **Purpose**: Manages product data fetching from Firebase.
 
 **Features**:
@@ -265,7 +328,7 @@ DEVOPS-project/
 
 ### Testing Infrastructure
 
-#### `app/src/test/setup.ts`
+#### `Phase1_Development/app/src/test/setup.ts`
 **Purpose**: Configures testing environment for Vitest.
 
 **Configuration**:
@@ -453,11 +516,11 @@ DEVOPS-project/
 
 # PHASE 2: INFRASTRUCTURE AS CODE & CLOUD DEPLOYMENT
 
-## 2.1 Terraform Infrastructure (`infra/terraform/`)
+## 2.1 Terraform Infrastructure (`Phase3_Deployment/infra/terraform/`)
 
 ### Module Structure
 
-#### `infra/terraform/modules/vpc/`
+#### `Phase3_Deployment/infra/terraform/modules/vpc/`
 **Purpose**: Creates AWS VPC with public/private subnets.
 
 **Resources Created**:
@@ -473,7 +536,7 @@ DEVOPS-project/
 
 ---
 
-#### `infra/terraform/modules/eks/`
+#### `Phase3_Deployment/infra/terraform/modules/eks/`
 **Purpose**: Provisions EKS cluster and node groups.
 
 **Resources**:
@@ -492,7 +555,7 @@ DEVOPS-project/
 
 ---
 
-#### `infra/terraform/modules/ecr/`
+#### `Phase3_Deployment/infra/terraform/modules/ecr/`
 **Purpose**: Creates container registry for Docker images.
 
 **Configuration**:
@@ -520,7 +583,7 @@ DEVOPS-project/
 
 ### Environment Configuration
 
-#### `infra/terraform/envs/dev/main.tf`
+#### `Phase3_Deployment/infra/terraform/envs/dev/main.tf`
 **Purpose**: Main Terraform configuration for development environment.
 
 **Module Integration**:
@@ -541,7 +604,7 @@ DEVOPS-project/
 
 ---
 
-#### `infra/terraform/envs/dev/variables.tf`
+#### `Phase3_Deployment/infra/terraform/envs/dev/variables.tf`
 **Purpose**: Defines input variables for infrastructure.
 
 **Variables**:
@@ -554,7 +617,7 @@ DEVOPS-project/
 
 ---
 
-#### `infra/terraform/envs/dev/outputs.tf`
+#### `Phase3_Deployment/infra/terraform/envs/dev/outputs.tf`
 **Purpose**: Exports infrastructure values for use in CI/CD.
 
 **Outputs**:
@@ -650,7 +713,7 @@ DEVOPS-project/
 
 ---
 
-#### `manifests/overlays/prod/deployment-patch.yaml`
+#### `Phase3_Deployment/overlays/prod/deployment-patch.yaml`
 **Purpose**: Production-specific overrides.
 
 **Overrides**:
@@ -663,7 +726,7 @@ DEVOPS-project/
 
 ---
 
-#### `manifests/overlays/prod/kustomization.yaml`
+#### `Phase3_Deployment/overlays/prod/kustomization.yaml`
 **Purpose**: Applies production patches.
 
 **Configuration**:
@@ -682,7 +745,7 @@ DEVOPS-project/
 
 **Configuration**:
 - Source: GitHub repository (rahul branch)
-- Path: manifests/overlays/prod
+- Path: Phase3_Deployment/overlays/prod
 - Destination: EKS cluster, default namespace
 - Sync policy: Automated
 - Self-heal: Enabled

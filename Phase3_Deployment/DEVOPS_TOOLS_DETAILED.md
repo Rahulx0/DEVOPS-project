@@ -45,7 +45,7 @@ const ProductCard = ({ product }) => {
 ```
 
 ### In Our Project
-- **Location**: `app/src/components/`
+- **Location**: `Phase1_Development/app/src/components/`
 - **Components**: 25+ reusable components
 - **State Management**: Context API for global state
 - **Routing**: Client-side routing for SPA experience
@@ -91,7 +91,7 @@ function addToCart(product: Product, quantity: number): void {
 - **Configuration**: `app/tsconfig.json`
 - **Strict Mode**: Enabled for maximum safety
 - **Type Coverage**: 100% of codebase
-- **Interfaces**: Defined in `app/src/lib/types.ts`
+- **Interfaces**: Defined in `Phase1_Development/app/src/lib/types.ts`
 
 ### Benefits Achieved
 ✅ Zero runtime type errors  
@@ -179,7 +179,7 @@ describe('ProductCard', () => {
 ### In Our Project
 - **Test Files**: `*.test.tsx` and `*.test.ts`
 - **Coverage**: 80%+ target
-- **Setup**: `app/src/test/setup.ts`
+- **Setup**: `Phase1_Development/app/src/test/setup.ts`
 - **Run Command**: `npm run test`
 
 ### Test Categories
@@ -256,7 +256,7 @@ const login = async (email: string, password: string) => {
 ```
 
 ### In Our Project
-- **Configuration**: `app/src/firebase.config.ts`
+- **Configuration**: `Phase1_Development/app/src/firebase.config.ts`
 - **Collections**: products, orders, users
 - **Storage**: Product images
 - **Security Rules**: Firestore and Storage rules
@@ -537,7 +537,7 @@ Terraform is an Infrastructure as Code (IaC) tool that lets you define cloud res
 
 ### Our Terraform Structure
 ```
-infra/terraform/
+Phase3_Deployment/infra/terraform/
 ├── modules/           # Reusable components
 │   ├── vpc/          # Network infrastructure
 │   ├── eks/          # Kubernetes cluster
@@ -842,7 +842,7 @@ steps:
 - uses: actions/upload-artifact@v4
   with:
     name: deployment-manifest
-    path: manifests/overlays/prod/
+    path: Phase3_Deployment/overlays/prod/
 
 # Download in later job
 - uses: actions/download-artifact@v4
@@ -937,7 +937,7 @@ spec:
   source:
     repoURL: https://github.com/Rahulx0/DEVOPS-project
     targetRevision: rahul
-    path: manifests/overlays/prod
+    path: Phase3_Deployment/overlays/prod
   
   destination:
     server: https://kubernetes.default.svc
@@ -1486,8 +1486,8 @@ E: >50% technical debt
 sonar.projectKey=Rahulx0_DEVOPS-project
 sonar.organization=rahulx0
 
-sonar.sources=app/src
-sonar.tests=app/src
+sonar.sources=Phase1_Development/app/src
+sonar.tests=Phase1_Development/app/src
 sonar.test.inclusions=**/*.test.tsx,**/*.test.ts
 
 sonar.javascript.lcov.reportPaths=app/coverage/lcov.info
