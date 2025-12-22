@@ -52,7 +52,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, setView }) => 
 
   const handleAddToCart = () => {
     addToCart(product);
-    showToast(`${product.name} added to cart!`);
+    // Toast is shown in CartContext, no need to show here
   };
 
   const handleWishlistToggle = () => {

@@ -85,7 +85,7 @@ const CheckoutView: React.FC<CheckoutViewProps> = ({ setView }) => {
               <Input name="address" type="text" placeholder="Address" required />
               <div className="flex flex-col sm:flex-row gap-4">
                 <Input name="city" type="text" placeholder="City" required />
-                <Input name="pincode" type="text" placeholder="Pincode" required pattern="\\d{6}" title="Enter a valid 6-digit pincode" />
+                <Input name="pincode" type="text" placeholder="Pincode" required pattern="\d{6}" title="Enter a valid 6-digit pincode" />
               </div>
             </div>
           </div>
