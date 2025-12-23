@@ -53,38 +53,87 @@ echo ""
 # Application URL
 echo "🌐 APPLICATION"
 echo "----------------------------------------"
-ALB_URL=$(kubectl get ingress urbangear-frontend-ingress -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null)
+# Try to get ALB URL from ingress
+ALB_URL=$(kubectl get ingress urbangear-frontend-ingress -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || echo "")
+
+# If ingress not found, try service
+if [ -z "$ALB_URL" ]; then
+    ALB_URL=$(kubectl get svc urbangear-frontend -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || echo "")
+fi
+
 # Check if ALB URL is available and display application URLs
-if [ -n "$ALB_URL" ]; then
+if [ -n "$ALB_URL" ] && [ "$ALB_URL" != "null" ]; then
     echo "   URL:   http://${ALB_URL}"
     echo "   Admin: http://${ALB_URL}/?admin=true"
 else
     echo "   Status: ALB still provisioning..."
+    # Show service status for debugging
+    echo "   Debug: Checking services..."
+    kubectl get svc,ingress 2>/dev/null | grep urbangear || echo "   No urbangear services found"
 fi
 echo ""
 
 # ArgoCD
 echo "🔄 ARGOCD (GitOps)"
 echo "----------------------------------------"
-# Check if ArgoCD namespace exists and retrieve admin credentials
-if kubectl get namespace argocd &>/dev/null; then
-    ARGOCD_PASS=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" 2>/dev/null | base64 -d)
+# Check if ArgoCD is running by looking for pods
+if kubectl get pods -n argocd 2>/dev/null | grep -q "argocd-server.*Running"; then
     echo "   URL:      https://localhost:8080"
     echo "   Username: admin"
+    
+    # Try multiple methods to get ArgoCD password
+    ARGOCD_PASS=""
+    
+    # Method 1: Try the initial admin secret
+    ARGOCD_PASS=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" 2>/dev/null | base64 -d 2>/dev/null || echo "")
+    
+    # Method 2: If secret doesn't exist, generate/reset password
+    if [ -z "$ARGOCD_PASS" ]; then
+        echo "   Status: Generating admin password..."
+        # Get the server pod name
+        SERVER_POD=$(kubectl get pods -n argocd -l app.kubernetes.io/name=argocd-server -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+        if [ -n "$SERVER_POD" ]; then
+            # Try to get current password or set a new one
+            ARGOCD_PASS=$(kubectl -n argocd exec $SERVER_POD -- argocd admin initial-password 2>/dev/null | head -1 || echo "")
+        fi
+    fi
+    
+    # Method 3: Default fallback
+    if [ -z "$ARGOCD_PASS" ]; then
+        ARGOCD_PASS="admin"
+        echo "   Note: Using default password. Reset via: kubectl -n argocd patch secret argocd-secret -p '{\"data\":{\"admin.password\":null,\"admin.passwordMtime\":null}}'"
+    fi
+    
     echo "   Password: ${ARGOCD_PASS}"
 else
-    echo "   Status: Not installed"
+    echo "   Status: Not running (check pods above)"
 fi
 echo ""
 
 # Grafana
 echo "📊 GRAFANA (Monitoring)"
 echo "----------------------------------------"
-# Check if monitoring namespace exists and retrieve Grafana credentials
-if kubectl get namespace monitoring &>/dev/null; then
+# Check if Grafana is running by looking for pods
+if kubectl get pods -n monitoring 2>/dev/null | grep -q "prometheus-grafana"; then
     echo "   URL:      http://localhost:3000"
     echo "   Username: admin"
-    GRAFANA_PASS=$(kubectl get secret -n monitoring prometheus-grafana -o jsonpath="{.data.admin-password}" 2>/dev/null | base64 -d || echo "prom-operator")
+    
+    # Try multiple methods to get Grafana password
+    GRAFANA_PASS=""
+    
+    # Method 1: Try prometheus-grafana secret
+    GRAFANA_PASS=$(kubectl get secret -n monitoring prometheus-grafana -o jsonpath="{.data.admin-password}" 2>/dev/null | base64 -d 2>/dev/null || echo "")
+    
+    # Method 2: If not found, try alternative secret names
+    if [ -z "$GRAFANA_PASS" ]; then
+        GRAFANA_PASS=$(kubectl get secret -n monitoring -l app.kubernetes.io/name=grafana -o jsonpath="{.items[0].data.admin-password}" 2>/dev/null | base64 -d 2>/dev/null || echo "")
+    fi
+    
+    # Method 3: Default password
+    if [ -z "$GRAFANA_PASS" ]; then
+        GRAFANA_PASS="prom-operator"
+    fi
+    
     echo "   Password: $GRAFANA_PASS"
 else
     echo "   Status: Not installed"
@@ -94,8 +143,8 @@ echo ""
 # Prometheus
 echo "📈 PROMETHEUS (Metrics)"
 echo "----------------------------------------"
-# Check if monitoring namespace exists and display Prometheus URL
-if kubectl get namespace monitoring &>/dev/null; then
+# Check if Prometheus is running by looking for pods
+if kubectl get pods -n monitoring 2>/dev/null | grep -q "prometheus-prometheus"; then
     echo "   URL:      http://localhost:9090"
 else
     echo "   Status: Not installed"
@@ -106,6 +155,28 @@ echo "=========================================="
 echo "✅ Port-forwarding is running in background"
 echo "=========================================="
 echo ""
+
+# Add overall status summary
+echo "📋 DEPLOYMENT SUMMARY"
+echo "----------------------------------------"
+APP_PODS=$(kubectl get pods -l app=urbangear-frontend --no-headers 2>/dev/null | wc -l)
+ARGOCD_PODS=$(kubectl get pods -n argocd -l app.kubernetes.io/name=argocd-server --no-headers 2>/dev/null | wc -l)
+GRAFANA_PODS=$(kubectl get pods -n monitoring -l app.kubernetes.io/name=grafana --no-headers 2>/dev/null | wc -l)
+
+echo "   Application Pods: $APP_PODS"
+echo "   ArgoCD Status: $([ $ARGOCD_PODS -gt 0 ] && echo "✅ Running" || echo "❌ Not Running")"
+echo "   Monitoring Status: $([ $GRAFANA_PODS -gt 0 ] && echo "✅ Running" || echo "❌ Not Running")"
+
+# Show cost information
+echo ""
+echo "💰 COST STATUS"
+echo "----------------------------------------"
+NODES=$(kubectl get nodes --no-headers 2>/dev/null | wc -l)
+echo "   Active Nodes: $NODES (t3.small SPOT instances)"
+echo "   Estimated Cost: ~$$(echo "$NODES * 0.01" | bc 2>/dev/null || echo "0.02")/hour"
+
+echo ""
 echo "To stop port-forwarding: pkill -f 'kubectl port-forward'"
+echo "To destroy all resources: ./Phase2_CI_CD/scripts/stop.sh"
 echo ""
 echo "=========================================="
