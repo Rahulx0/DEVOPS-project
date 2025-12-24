@@ -17,7 +17,7 @@ spec:
       # Frontend container patch
       - name: frontend
         # Production image
-        image: 924612597584.dkr.ecr.us-east-1.amazonaws.com/urbangear-dev-frontend:latest
+        image: 924612597584.dkr.ecr.us-east-1.amazonaws.com/urbangear-dev-frontend:d231d4e606c3c7867e9f1313de0980d912b3a0fd
         # Production resource limits
         resources:
           requests:
