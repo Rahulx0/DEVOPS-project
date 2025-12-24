@@ -29,7 +29,7 @@ const Hero: React.FC<{ setView: (view: AppView) => void }> = ({ setView }) => {
             </h1>
             <p style={getStyle(400)} className="mt-6 text-base sm:text-lg text-text-light dark:text-gray-300 max-w-md mx-auto md:mx-0">
               Premium streetwear and exclusive sneakers. Curated collections for those
-              who value quality, comfort, and authentic style.
+              who value quality, comfort, and authentic style for the Genz.
             </p>
             <div className="mt-8" style={getStyle(500)}>
               <Button 
