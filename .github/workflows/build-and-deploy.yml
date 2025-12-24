@@ -1,6 +1,13 @@
 # Name of the GitHub Actions workflow
 name: Build and Deploy
 
+# Permissions for GitHub Actions
+permissions:
+  contents: write
+  security-events: write
+  actions: read
+  pull-requests: read
+
 # Triggers for the workflow
 on:
   push:
@@ -169,8 +176,10 @@ jobs:
           git config --global user.email "actions@github.com"
           git add Phase3_Deployment/overlays/prod/deployment-patch.yaml
           git diff --quiet && git diff --staged --quiet || git commit -m "chore: update image to ${{ steps.image.outputs.tag }}"
-          git push origin rahul
+          git push https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:rahul
         continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload updated manifest
         uses: actions/upload-artifact@v4
